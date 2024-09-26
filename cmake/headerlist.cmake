@@ -8,6 +8,7 @@ set(headers ${headers}
 	src/Hooks/soulgemHooks.h
 	src/Hooks/weapHooks.h
 	src/PCH.h
+	src/dropPrevention.h
 	src/hooks.h
 	src/referenceManager.h
 	src/settingsReader.h

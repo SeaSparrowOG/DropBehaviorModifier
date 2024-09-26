@@ -7,7 +7,7 @@
 #include "Hooks/miscHooks.h"
 #include "Hooks/soulgemHooks.h"
 #include "Hooks/weapHooks.h"
-
+#include "dropPrevention.h"
 
 namespace Hooks {
     void Install()
@@ -26,5 +26,8 @@ namespace Hooks {
         _loggerInfo("Installed vfunc hook for Soul Gem Items.");
         WeaponHooks::GetSingleton()->Install();
         _loggerInfo("Installed vfunc hook for Weapon Items.");
+
+        DropPrevention::DropObject::Install();
+        _loggerInfo("Installed vfunc hook for dropping items.");
     }
 }
