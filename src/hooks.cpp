@@ -13,11 +13,18 @@ namespace Hooks {
     void Install()
     {
         AlchemyItemHooks::GetSingleton()->Install();
+        _loggerInfo("Installed vfunc hook for Alchemy Items.");
         ArmorHooks::GetSingleton()->Install();
+        _loggerInfo("Installed vfunc hook for Armor Items.");
         BookHooks::GetSingleton()->Install();
+        _loggerInfo("Installed vfunc hook for Book Items.");
         IngredientHooks::GetSingleton()->Install();
+        _loggerInfo("Installed vfunc hook for Ingredient Items.");
         MiscHooks::GetSingleton()->Install();
+        _loggerInfo("Installed vfunc hook for Misc Items.");
         SoulGemHooks::GetSingleton()->Install();
+        _loggerInfo("Installed vfunc hook for Soul Gem Items.");
         WeaponHooks::GetSingleton()->Install();
+        _loggerInfo("Installed vfunc hook for Weapon Items.");
     }
 }

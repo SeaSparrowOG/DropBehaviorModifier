@@ -12,5 +12,27 @@ namespace Manager {
 	{
 		if (!a_base || !a_newModel) return;
 		_matches[a_base] = a_newModel;
+
+		std::string key = _debugEDID(a_base);
+		if (key.empty()) {
+			key = a_base->GetName();
+		}
+		if (key.empty()) {
+			std::stringstream ss;
+			ss << a_base->formID;
+			key = ss.str();
+		}
+
+		std::string_view value = _debugEDID(a_newModel);
+		if (value.empty()) {
+			value = a_newModel->GetName();
+		}
+		if (value.empty()) {
+			std::stringstream ss;
+			ss << a_newModel->formID;
+			value = ss.str();
+		}
+
+		_loggerInfo("Registered new pair: {} to {}", key, value);
 	}
 }

@@ -57,5 +57,6 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
     messaging->RegisterListener(MessageHandler);
 
     Hooks::Install();
+    _loggerInfo("-------------------------------------------------------------------------------------");
     return true;
 }
