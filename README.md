@@ -1,21 +1,23 @@
-## Drop Behavior Modifier
-SKSE framework for modifying the mesh of dropped objects based on their count.
+# Drop Behavior Modifier
+SKSE plugin that supports my model replacement mod. Replaces a given reference's model if the count of it matches a parameter.
+
+## Requirements
+* [CMake](https://cmake.org/)
+	* Add this to your `PATH`
+* [Vcpkg](https://github.com/microsoft/vcpkg)
+	* Add the environment variable `VCPKG_ROOT` with the value as the path to the folder containing vcpkg
+* [Visual Studio Community 2022](https://visualstudio.microsoft.com/)
+	* Desktop development with C++
+
+## Register Visual Studio as a Generator
+* Open `x64 Native Tools Command Prompt`
+* Run `cmake`
+* Close the cmd window
 
 ## Building
-### Requirements:
-- CMake
-- VCPKG
-- Visual Studio (with desktop C++ development)
----
-### Instructions:
 ```
-git clone https://github.com/SeaSparrowOG/DropBehaviorModifier
-cd DropBehaviorModifier
-git submodule init
-git submodule update --recursive
-cmake --preset vs2022-windows-vcpkg 
-cmake --build Release --config Release
+git clone https://github.com/SeaSparrowOG/drop-behavior-modifier
+cd drop-behavior-modifier
+cmake --preset vs2022-windows
+cmake --build build --config Release
 ```
----
-### Automatic deployment to MO2:
-You can automatically deploy to MO2's mods folder by defining an [Environment Variable](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_environment_variables?view=powershell-7.4) named SKYRIM_MODS_FOLDER and pointing it to your MO2 mods folder. It will create a new mod with the appropriate name. After that, simply refresh MO2 and enable the mod.
