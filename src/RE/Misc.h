@@ -4,29 +4,47 @@
 
 namespace RE
 {
-	inline void DebugNotification(const char* a_notification, const char* a_soundToPlay, bool a_cancelIfAlreadyQueued)
+	// Thanks PO3
+	namespace BSModelDB
 	{
-		using func_t = decltype(&DebugNotification);
-		static REL::Relocation<func_t> func{ Offset::DebugNotification };
-		return func(a_notification, a_soundToPlay, a_cancelIfAlreadyQueued);
+		struct DBTraits
+		{
+		public:
+			inline static constexpr auto          RTTI = RTTI_BSModelDB__DBTraits;
+			inline static constexpr std::uint32_t LOAD_QUEUE_SIZE = 8;
+			inline static constexpr std::uint32_t RELEASE_QUEUE_SIZE = 2;
+
+			using U_Type = NiPointer<NiNode>;
+
+			struct ArgsType
+			{
+			public:
+				// members
+				std::uint32_t LODmult{ 0 };         // 0
+				std::uint32_t texLoadLevel{ 3 };    // 4
+				bool          unk8{ true };         // 8
+				bool          unk9{ false };        // 9
+				bool          unkA{ true };         // A
+				bool          postProcess{ true };  // B
+			};
+			static_assert(sizeof(ArgsType) == 0xC);
+		};
+		static_assert(std::is_empty_v<DBTraits>);
 	}
 
-	void CreateMessage(const char* a_message, IMessageBoxCallback* a_callback, std::uint32_t a_arg3, std::uint32_t a_arg4, std::uint32_t a_arg5, const char* a_buttonText, const char* a_secondaryButtonText)
+	// Extra thank you to PO3
+	int Demand(const char* a_modelPath, NiPointer<NiNode>& a_modelOut, const BSModelDB::DBTraits::ArgsType& a_args)
 	{
-		using func_t = decltype(&CreateMessage);
-		static REL::Relocation<func_t> func{ RE::Offset::CreateMessage };
-		return func(a_message, a_callback, a_arg3, a_arg4, a_arg5, a_buttonText, a_secondaryButtonText);
+		using func_t = decltype(&Demand);
+		static REL::Relocation<func_t> func{ REL::ID(75782) };
+		return func(a_modelPath, a_modelOut, a_args);
 	}
 
-	void GetMessageText(RE::TESDescription* a_this, const char* a_result, void* a_3 = nullptr, std::uint32_t a_4 = 0x43534544)
+	// Probably unneeded
+	inline int GetModelType(RE::TESForm* a_form)
 	{
-		using func_t = decltype(&GetMessageText);
-		static REL::Relocation<func_t> func{ RE::Offset::Message::GetDescription };
-		return func(a_this, a_result, a_3, a_4);
-	}
-
-	void DebugMessageBox(const char* a_message)
-	{
-		CreateMessage(a_message, nullptr, 0, 4, 10, GameSettingCollection::GetSingleton()->GetSetting("sOk")->GetString(), nullptr);
+		using func_t = decltype(&GetModelType);
+		static REL::Relocation<func_t> func{ REL::ID(13413) };
+		return func(a_form);
 	}
 }

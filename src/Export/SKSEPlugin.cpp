@@ -98,5 +98,8 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 		SKSE::stl::report_and_fail("Failed to install necessary hooks."sv);
 	}
 
+	const auto messaging = SKSE::GetMessagingInterface();
+	messaging->RegisterListener(&MessageEventCallback);
+
 	return true;
 }

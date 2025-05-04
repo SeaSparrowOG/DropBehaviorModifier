@@ -7,12 +7,11 @@ namespace Hooks {
 		bool Install();
 
 	private:
-		struct IngredientListener
+		struct LoadGraphicsPrologue
 		{
 			static bool Install();
 			static RE::NiAVObject* Thunk(RE::TESObject* a_this, RE::TESObjectREFR* a_ref);
 
-			inline static size_t offset{ 0x47 };
 			inline static REL::Relocation<decltype(&Thunk)> _func;
 		};
 	};

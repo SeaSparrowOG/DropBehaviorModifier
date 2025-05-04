@@ -2,6 +2,8 @@
 
 #include <xbyak.h>
 
+#include "ModelReplacer/ModelReplacer.h"
+
 namespace Hooks 
 {
 	bool Install() {
@@ -12,10 +14,10 @@ namespace Hooks
 	}
 
 	bool LoadListener::Install() {
-		return IngredientListener::Install();
+		return LoadGraphicsPrologue::Install();
 	}
 
-	bool LoadListener::IngredientListener::Install() {
+	bool LoadListener::LoadGraphicsPrologue::Install() {
         REL::Relocation<std::uintptr_t> target{ REL::ID(17653) }; // TESObject::LoadGraphics
 
         struct Patch : Xbyak::CodeGenerator
@@ -44,12 +46,11 @@ namespace Hooks
         return true;
 	}
 
-	RE::NiAVObject* LoadListener::IngredientListener::Thunk(RE::TESObject* a_this, RE::TESObjectREFR* a_ref) {
-        auto* replacement = RE::TESForm::LookupByEditorID<RE::TESObjectARMO>("ArmorIronShield");
-        const auto count = a_ref ? a_ref->extraList.GetCount() : 0;
-        if (count > 1) {
-            auto* newObj = _func(replacement, nullptr);
-            return newObj;
+	RE::NiAVObject* LoadListener::LoadGraphicsPrologue::Thunk(RE::TESObject* a_this, RE::TESObjectREFR* a_ref) {
+        auto* replacer = ModelReplacer::Swapper::GetSingleton();
+        if (replacer) {
+            auto* response = replacer->AttemptModelSwap(a_this, a_ref);
+            return response ? response : _func(a_this, a_ref);
         }
         return _func(a_this, a_ref);
 	}

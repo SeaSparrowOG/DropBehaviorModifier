@@ -2,9 +2,14 @@
 
 namespace ModelReplacer
 {
+	struct ModelSwap
+	{
+
+	};
+
 	class Swapper : public ISingleton<Swapper>
 	{
 	public:
-		void AttemptModelSwap(RE::TESBoundObject* a_base);
+		RE::NiAVObject* AttemptModelSwap(RE::TESObject* a_base, RE::TESObjectREFR* a_ref);
 	};
 }
