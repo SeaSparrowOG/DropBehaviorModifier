@@ -40,6 +40,13 @@ namespace RE
 		return func(a_modelPath, a_modelOut, a_args);
 	}
 
+	NiAVObject* CloneNiAVObject(NiAVObject* a_original)
+	{
+		using func_t = decltype(&CloneNiAVObject);
+		static REL::Relocation<func_t> func{ REL::ID(70187) };
+		return func(a_original);
+	}
+
 	// Probably unneeded
 	inline int GetModelType(RE::TESForm* a_form)
 	{
