@@ -73,12 +73,15 @@ namespace ModelReplacer
 			});
 		return SwapRegistrationReport::kSuccess;
 	}
-
+	
 	void TextureSwap::Apply(RE::NiAVObject* a_target) {
-		auto newTexture = RE::NiTexturePtr();
-		RE::GetTexture(texturePath.c_str(), true, newTexture, false);
+		auto texturePtr = RE::NiTexturePtr();
+		RE::GetTexture(texturePath.c_str(), true, texturePtr, false);
+		if (!texturePtr || !texturePtr.get()) {
+			return;
+		}
+		auto* newTexture = netimmerse_cast<RE::NiSourceTexture*>(texturePtr.get());
 		if (!newTexture) {
-			LOG_DEBUG("Failed to get texture for {}"sv, texturePath);
 			return;
 		}
 
@@ -98,19 +101,22 @@ namespace ModelReplacer
 		auto* bsTriShape = targetNode->AsTriShape();
 		auto* properties = bsTriShape ? bsTriShape->properties[1].get() : nullptr;
 		auto* bsLightShader = properties ? netimmerse_cast<RE::BSLightingShaderProperty*>(properties) : nullptr;
-
-#ifndef NDEBUG
-		if (!bsLightShader && properties) {
-			LOG_DEBUG("Failed to cast properties as bsLightShader"sv);
-		}
-		else if (bsLightShader) {
-			LOG_DEBUG("Success!");
-		}
-#endif
-
-		if (!bsLightShader) {
+		auto* shaderMaterial = bsLightShader ? bsLightShader->material : nullptr;
+		auto* base = shaderMaterial ? skyrim_cast<RE::BSLightingShaderMaterialBase*>(shaderMaterial) : nullptr;
+		if (!base) {
+			LOG_DEBUG("Failed to cast."sv);
 			return;
 		}
+
+		auto baseTextureSet = base->GetTextureSet();
+		if (!baseTextureSet) {
+			LOG_DEBUG("Failed to get texture set."sv);
+			return;
+		}
+
+		auto assign = RE::NiSourceTexturePtr(newTexture);
+		// baseTextureSet->SetTexture(RE::BSTextureSet::Texture::kDiffuse, assign);
+		base->diffuseTexture = assign;
 	}
 
 	TextureSwap::TextureSwap(const std::vector<std::string>& a_nodePath, 
@@ -140,7 +146,8 @@ namespace ModelReplacer
 				texSwap.Apply(constructedObject);
 			}
 		}
-		return RE::CloneNiAVObject(constructedObject);
+
+		return constructedObject;
 	}
 
 	ModelSwap::ModelSwap(int32_t a_count, 

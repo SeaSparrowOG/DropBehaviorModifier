@@ -28,7 +28,7 @@ namespace Settings
 			std::string CONDITIONAL_MODEL_FIELD{ "Model" };
 
 			std::string ALT_TEXTURE_FIELD{ "AltTextures" };
-			std::string ALT_TEXTURE_PATH_FIELD{ "Path" };
+			std::string ALT_TEXTURE_PATH_FIELD{ "Diffuse" };
 			std::string ALT_TEXTURE_TARGET_FIELD{ "Target" };
 
 			std::vector<std::pair<RE::TESBoundObject*, ModelReplacer::ModelSwap>> configData{};

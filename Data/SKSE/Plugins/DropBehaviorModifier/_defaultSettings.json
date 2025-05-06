@@ -8,7 +8,7 @@
             "AltTextures": [
                 {
                     "Target": "MiscSackLargeFlat03:0",
-                    "Path": "SeaSparrow\\DynamicDroppedObjects\\LargeBurlapApples.dds"
+                    "Diffuse": "SeaSparrow\\DynamicDroppedObjects\\LargeBurlapApples.dds"
                 }
             ]
         }
