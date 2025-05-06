@@ -47,11 +47,10 @@ namespace RE
 		return func(a_original);
 	}
 
-	// Probably unneeded
-	inline int GetModelType(RE::TESForm* a_form)
+	static void GetTexture(const char* a_path, bool a_demand, NiPointer<NiTexture>& a_out, bool a_4)
 	{
-		using func_t = decltype(&GetModelType);
-		static REL::Relocation<func_t> func{ REL::ID(13413) };
-		return func(a_form);
+		using func_t = decltype(&GetTexture);
+		static REL::Relocation<func_t> func{ REL::ID(105640) };
+		return func(a_path, a_demand, a_out, a_4);
 	}
 }

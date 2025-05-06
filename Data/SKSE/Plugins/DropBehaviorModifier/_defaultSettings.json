@@ -1,8 +1,16 @@
 {
-  "MinimumVersion": 1,
-  "Skyrim.esm|0xA": [
-      { "Model": "Weapons\\Iron\\LongSword.nif", "Count": 10 },
-      { "Model": "Weapons\\Iron\\IronMace.nif", "Count": 5  },
-      { "Model": "Weapons\\Iron\\IronDagger.nif", "Count": 15 }
-  ]
+    "MinimumVersion": 1,
+    "NewModels": [
+        {
+            "BaseObject": "Skyrim.esm|0xA",
+            "Count": 3,
+            "Model": "SeaSparrow\\DynamicDroppedObjects\\LargeSack.nif",
+            "AltTextures": [
+                {
+                    "Target": "MiscSackLargeFlat03:0",
+                    "Path": "SeaSparrow\\DynamicDroppedObjects\\LargeBurlapApples.dds"
+                }
+            ]
+        }
+    ]
 }

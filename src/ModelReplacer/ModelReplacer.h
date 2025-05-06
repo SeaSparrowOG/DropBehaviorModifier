@@ -8,40 +8,40 @@ namespace ModelReplacer
 		kCountExists
 	};
 
-	struct ModelSwap
+	class TextureSwap
 	{
 	private:
-		std::vector<std::pair<int32_t, std::string>> replacements{};
+		std::vector<std::string> nodePath{};
+		std::string              texturePath{};
+
 	public:
-		std::string BestMatch(int32_t a_count) {
-			auto finish = replacements.end();
-			for (auto it = replacements.begin(); it != finish; ++it) {
-				const auto& [count, path] = *it;
-				if (a_count >= count) {
-					return path;
-				}
-			}
-			return "";
+		void Apply(RE::NiAVObject* a_target);
+
+		TextureSwap(const std::vector<std::string>& a_nodePath, 
+			const std::string& a_texturePath);
+	};
+
+	class ModelSwap
+	{
+	private:
+		std::vector<TextureSwap> altTextures{};
+		std::string              altModel{};
+		int32_t                  requiredCount{ 100 };
+
+	public:
+		bool Matches(int32_t a_otherCount) const {
+			return a_otherCount >= requiredCount;
 		}
 
-		SwapRegistrationReport RegisterAdditionalSwap(std::string a_modelPath, int32_t a_minCount) {
-			if (!replacements.empty()) {
-				auto finish = replacements.end();
-				for (auto it = replacements.begin(); it != finish; ++it) {
-					const auto& [count, path] = *it;
-					if (count == a_minCount) {
-						return SwapRegistrationReport::kCountExists;
-					}
-				}
-			}
-
-			replacements.emplace_back(a_minCount, a_modelPath);
-			std::sort(replacements.begin(), replacements.end(),
-				[](const auto& lhs, const auto& rhs) {
-					return lhs.first > rhs.first;
-				});
-			return SwapRegistrationReport::kSuccess;
+		int32_t GetRequiredCount() const {
+			return requiredCount;
 		}
+
+		RE::NiAVObject* ConstructGraphics();
+
+		ModelSwap(int32_t a_count, 
+			const std::string& a_newModel, 
+			const std::vector<TextureSwap>& a_textureSwaps);
 	};
 
 	class Swapper : public ISingleton<Swapper>
@@ -49,9 +49,13 @@ namespace ModelReplacer
 	public:
 		RE::NiAVObject* AttemptModelSwap(RE::TESObject* a_base, RE::TESObjectREFR* a_ref);
 
-		SwapRegistrationReport RegisterSwap(RE::TESBoundObject* a_form, int32_t a_count, const std::string& a_modelPath);
+		SwapRegistrationReport RegisterSwap(RE::TESBoundObject* a_form, ModelSwap a_newSwap);
 
 	private:
-		std::unordered_map<RE::TESBoundObject*, ModelSwap> m_registeredSwaps{};
+		ModelSwap* BestMatch(RE::TESBoundObject* a_base, int32_t a_count);
+		SwapRegistrationReport RegisterAdditionalSwap(ModelSwap a_newSwap,
+			std::vector<ModelSwap>& a_oldSwaps);
+
+		std::unordered_map<RE::TESBoundObject*, std::vector<ModelSwap>> m_registeredSwaps{};
 	};
 }
