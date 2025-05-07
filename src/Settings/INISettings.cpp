@@ -126,7 +126,8 @@ namespace Settings::INI
 		};
 
 		const StoredSetting expectedSettings[] = {
-			{"General", "bFakeSetting"}
+			{"Hooks", "bTweakMiscObjects"},
+			{"Hooks", "bTweakAlchemyItems"}
 		};
 
 		logger::info("Verifying INI settings..."sv);

@@ -3,55 +3,89 @@
 #include <xbyak.h>
 
 #include "ModelReplacer/ModelReplacer.h"
+#include "RE/Offset.h"
 
 namespace Hooks 
 {
 	bool Install() {
 		logger::info("==========================================================");
 		logger::info("Installing Hooks...");
-		SKSE::AllocTrampoline(34);
-		return LoadListener::GetSingleton()->Install();
+		bool nominal = true;
+
+		auto* miscManager = TESObjectMiscHook::GetSingleton();
+		if (!miscManager) {
+			logger::critical("  >Failed to get miscManager singleton."sv);
+			nominal = false;
+		}
+		auto* alchemyItemManager = TESObjectALCIHook::GetSingleton();
+		if (!alchemyItemManager) {
+			logger::critical("  >Failed to get alchemyItemManager singleton."sv);
+			nominal = false;
+		}
+
+		if (!nominal) {
+			return false;
+		}
+
+		return miscManager->Install(RE::Offset::TESObjectMISC::VTABLE) && 
+			alchemyItemManager->Install(RE::Offset::AlchemyItem::VTABLE);
 	}
 
-	bool LoadListener::Install() {
-		return LoadGraphicsPrologue::Install();
+    bool TESObjectMiscHook::Install(REL::ID a_vtableAddress) {
+		logger::info("Checking for Misc Objects hook."sv);
+		try {
+			auto response = HookIfNecessary(a_vtableAddress, 0x47, setting, Thunk);
+			if (response.has_value()) {
+				_func = response.value();
+				logger::info("  >Hook installed."sv);
+			}
+			else {
+				logger::info("  >Player disabled this hook."sv);
+			}
+		}
+		catch (std::exception&) {
+			return false;
+		}
+		return true;
+    }
+
+	RE::NiAVObject* TESObjectMiscHook::Thunk(RE::TESObject* a_this, 
+		RE::TESObjectREFR* a_ref)
+	{
+		auto* replacer = ModelReplacer::Swapper::GetSingleton();
+		if (replacer) {
+			auto* response = replacer->AttemptModelSwap(a_this, a_ref);
+			return response ? response : _func(a_this, a_ref);
+		}
+		return _func(a_this, a_ref);
 	}
 
-	bool LoadListener::LoadGraphicsPrologue::Install() {
-        REL::Relocation<std::uintptr_t> target{ REL::ID(17653) }; // TESObject::LoadGraphics
-
-        struct Patch : Xbyak::CodeGenerator
-        {
-            Patch(std::uintptr_t a_originalFuncAddr, std::size_t a_originalByteLength)
-            {
-                for (size_t i = 0; i < a_originalByteLength; i++) {
-                    db(*reinterpret_cast<uint8_t*>(a_originalFuncAddr + i));
-                }
-
-                jmp(qword[rip]);
-                dq(a_originalFuncAddr + a_originalByteLength);
-            }
-        };
-
-        Patch p(target.address(), 6);
-        p.ready();
-
-        auto& trampoline = SKSE::GetTrampoline();
-        trampoline.write_branch<5>(target.address(), Thunk);
-
-        auto alloc = trampoline.allocate(p.getSize());
-        memcpy(alloc, p.getCode(), p.getSize());
-
-        _func = reinterpret_cast<std::uintptr_t>(alloc);
-        return true;
+	inline bool TESObjectALCIHook::Install(REL::ID a_vtableAddress) {
+		logger::info("Checking for Alchemy Item hook."sv);
+		try {
+			auto response = HookIfNecessary(a_vtableAddress, 0x47, setting, Thunk);
+			if (response.has_value()) {
+				_func = response.value();
+				logger::info("  >Hook installed."sv);
+			}
+			else {
+				logger::info("  >Player disabled this hook."sv);
+			}
+		}
+		catch (std::exception&) {
+			return false;
+		}
+		return true;
 	}
 
-	RE::NiAVObject* LoadListener::LoadGraphicsPrologue::Thunk(RE::TESObject* a_this, RE::TESObjectREFR* a_ref) {
-        auto* replacer = ModelReplacer::Swapper::GetSingleton();
-        if (replacer) {
-            auto* response = replacer->AttemptModelSwap(a_this, a_ref);
-            return response ? response : _func(a_this, a_ref);
-        }
-        return _func(a_this, a_ref);
+	inline RE::NiAVObject* TESObjectALCIHook::Thunk(RE::TESObject* a_this,
+		RE::TESObjectREFR* a_ref) 
+	{
+		auto* replacer = ModelReplacer::Swapper::GetSingleton();
+		if (replacer) {
+			auto* response = replacer->AttemptModelSwap(a_this, a_ref);
+			return response ? response : _func(a_this, a_ref);
+		}
+		return _func(a_this, a_ref);
 	}
 }

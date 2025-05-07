@@ -115,7 +115,6 @@ namespace ModelReplacer
 		}
 
 		auto assign = RE::NiSourceTexturePtr(newTexture);
-		// baseTextureSet->SetTexture(RE::BSTextureSet::Texture::kDiffuse, assign);
 		base->diffuseTexture = assign;
 	}
 

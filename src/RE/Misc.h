@@ -4,7 +4,7 @@
 
 namespace RE
 {
-	// Thanks PO3
+	// Nabbed from PO3, but also pointed to it by Parapets.
 	namespace BSModelDB
 	{
 		struct DBTraits
@@ -32,7 +32,7 @@ namespace RE
 		static_assert(std::is_empty_v<DBTraits>);
 	}
 
-	// Extra thank you to PO3
+	// Lifted from PO3's ComonLib.
 	int Demand(const char* a_modelPath, NiPointer<NiNode>& a_modelOut, const BSModelDB::DBTraits::ArgsType& a_args)
 	{
 		using func_t = decltype(&Demand);
@@ -40,13 +40,7 @@ namespace RE
 		return func(a_modelPath, a_modelOut, a_args);
 	}
 
-	NiAVObject* CloneNiAVObject(NiAVObject* a_original)
-	{
-		using func_t = decltype(&CloneNiAVObject);
-		static REL::Relocation<func_t> func{ REL::ID(70187) };
-		return func(a_original);
-	}
-
+	// a_demand is likely wrong. It seems to always be provided as "true". No idea what a_4 is.
 	static void GetTexture(const char* a_path, bool a_demand, NiPointer<NiTexture>& a_out, bool a_4)
 	{
 		using func_t = decltype(&GetTexture);

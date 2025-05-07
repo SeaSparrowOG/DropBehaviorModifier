@@ -64,9 +64,6 @@ static void MessageEventCallback(SKSE::MessagingInterface::Message* a_msg)
 {
 	switch (a_msg->type) {
 	case SKSE::MessagingInterface::kDataLoaded:
-		if (!Settings::INI::Holder::GetSingleton()->Read()) {
-			SKSE::stl::report_and_fail("Failed to read INI settings."sv);
-		}
 		if (!Settings::JSON::Holder::GetSingleton()->Read()) {
 			SKSE::stl::report_and_fail("Failed to read JSON settings."sv);
 		}
@@ -93,7 +90,9 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 	}
 
 	logger::info("Performing startup tasks..."sv);
-
+	if (!Settings::INI::Holder::GetSingleton()->Read()) {
+		SKSE::stl::report_and_fail("Failed to read INI settings."sv);
+	}
 	if (!Hooks::Install()) {
 		SKSE::stl::report_and_fail("Failed to install necessary hooks."sv);
 	}
