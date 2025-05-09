@@ -31,6 +31,13 @@ namespace Events
 			return control::kContinue;
 		}
 
+		auto* ui = RE::UI::GetSingleton();
+		if (!ui || 
+			!ui->IsMenuOpen(RE::InventoryMenu::MENU_NAME))
+		{
+			return control::kContinue;
+		}
+
 		auto* eventRef = RE::TESForm::LookupByID<RE::TESObjectREFR>(a_event->formID);
 		auto* eventBase = eventRef ? eventRef->GetBaseObject() : nullptr;
 		auto eventCount = eventBase ? eventRef->extraList.GetCount() : 0;
