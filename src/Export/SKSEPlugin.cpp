@@ -1,3 +1,4 @@
+#include "Events/Events.h"
 #include "Hooks/Hooks.h"
 #include "Settings/INISettings.h"
 #include "Settings/JSONSettings.h"
@@ -66,6 +67,10 @@ static void MessageEventCallback(SKSE::MessagingInterface::Message* a_msg)
 	case SKSE::MessagingInterface::kDataLoaded:
 		if (!Settings::JSON::Holder::GetSingleton()->Read()) {
 			SKSE::stl::report_and_fail("Failed to read JSON settings."sv);
+		}
+		logger::info("==========================================================");
+		if (!Events::Install()) {
+			SKSE::stl::report_and_fail("Failed to register event listeners."sv);
 		}
 		logger::info("==========================================================");
 		logger::info("Startup tasks finished, enjoy your game!");
