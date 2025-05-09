@@ -21,9 +21,11 @@ namespace Settings
 
 		private:
 			std::string MIN_VERSION_FIELD{ "MinimumVersion" };
-			std::string NEW_MODELS_FIELD{ "NewModels" };
+			std::string SWAPS_FIELD{ "Swaps" };
 
 			std::string BASE_OBJECT_FIELD{ "BaseObject" };
+			std::string ALT_MODELS_FIELD{ "AltModels" };
+
 			std::string CONDITIONAL_COUNT_FIELD{ "Count" };
 			std::string CONDITIONAL_MODEL_FIELD{ "Model" };
 
@@ -33,7 +35,8 @@ namespace Settings
 
 			std::vector<std::pair<RE::TESBoundObject*, ModelReplacer::ModelSwap>> configData{};
 			bool ReadConfig(const Json::Value& a_json);
-			bool ReadNewModel(const Json::Value& a_json);
+			bool ReadEntry(const Json::Value& a_json);
+			bool ReadNewModel(const Json::Value& a_json, RE::TESBoundObject* a_base);
 
 			/// <summary>
 			/// Populates a given vector with all the valid texture swaps found in the provided json field.

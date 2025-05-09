@@ -19,6 +19,12 @@ namespace Hooks
 		{
 			auto* replacer = ModelReplacer::Swapper::GetSingleton();
 			auto* base = replacer && a_this ? skyrim_cast<RE::TESBoundObject*>(a_this) : nullptr;
+#ifndef NDEBUG
+			const auto itemCount = a_ref ? a_ref->extraList.GetCount() : 0;
+			if (base && itemCount > 1 && itemCount != 100) {
+				LOG_DEBUG("Stacked item: [{}]:{}", itemCount, base->GetName());
+			}
+#endif
 			auto* alt = replacer ? replacer->AttemptModelSwap(base, a_ref) : nullptr;
 			return alt ? alt : _func(a_this, a_ref);
 		}

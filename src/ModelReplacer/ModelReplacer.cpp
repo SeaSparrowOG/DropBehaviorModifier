@@ -25,7 +25,13 @@ namespace ModelReplacer
 			ui->IsMenuOpen(RE::InventoryMenu::MENU_NAME)
 			)) 
 		{
-			return nullptr;
+			// Note that the preview object does NOT have a parent cell.
+			// However, dropped objects still load their graphics even when the menu is open
+			// so this dirty check filters out only the inventory object.
+			const auto* parentCell = a_ref->GetParentCell();
+			if (!parentCell) {
+				return nullptr;
+			}
 		}
 
 		LOG_DEBUG("Object: {}", Utilities::EDID::GetEditorID(a_base));

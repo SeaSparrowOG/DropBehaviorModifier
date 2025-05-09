@@ -39,8 +39,13 @@ namespace Settings::JSON
 			Json::Value JSONFile;
 			try {
 				std::ifstream rawJSON(path);
-				JSONReader.parse(rawJSON, JSONFile);
 				auto filename = path.substr(jsonFolder.size() + 1, path.size() - 1);
+#ifdef NDEBUG
+				if (filename == "_testConfig.json") {
+					continue;
+				}
+#endif
+				JSONReader.parse(rawJSON, JSONFile);
 				logger::info("  >Reading config {}..."sv, filename);
 				if (JSONFile.empty()) {
 					logger::warn("  >Failed to read config {}."sv, filename);
@@ -64,6 +69,7 @@ namespace Settings::JSON
 				}
 
 				for (auto& [base, data] : configData) {
+					LOG_DEBUG("Registering rule for {}"sv, base->GetName());
 					modelReplacer->RegisterSwap(base, data);
 				}
 			}
@@ -103,18 +109,18 @@ namespace Settings::JSON
 			return false;
 		}
 
-		const auto& newModelsField = a_json[NEW_MODELS_FIELD];
-		if (!newModelsField) {
-			logger::error("    >Config does not have {} specified."sv, NEW_MODELS_FIELD);
+		const auto& newSwapsField = a_json[SWAPS_FIELD];
+		if (!newSwapsField) {
+			logger::error("    >Config does not have {} specified."sv, SWAPS_FIELD);
 			return false;
 		}
-		else if (!newModelsField.isArray()) {
-			logger::error("    >Config has {}, but it is not an array. Treating config as invalid."sv, NEW_MODELS_FIELD);
+		else if (!newSwapsField.isArray()) {
+			logger::error("    >Config has {}, but it is not an array. Treating config as invalid."sv, SWAPS_FIELD);
 			return false;
 		}
 		
-		for (const auto& newModel : newModelsField) {
-			if (!ReadNewModel(newModel)) {
+		for (const auto& swap : newSwapsField) {
+			if (!ReadEntry(swap)) {
 				return false;
 			}
 		}
@@ -123,14 +129,14 @@ namespace Settings::JSON
 		return true;
 	}
 
-	bool Holder::ReadNewModel(const Json::Value& a_json) {
+	bool Holder::ReadEntry(const Json::Value& a_json) {
 		const auto& baseObjectField = a_json[BASE_OBJECT_FIELD];
 		if (!baseObjectField) {
-			logger::error("    >Config has swap defined in {} without {}. Treating config as invalid."sv, NEW_MODELS_FIELD, BASE_OBJECT_FIELD);
+			logger::error("    >Config has swap defined in {} without {}. Treating config as invalid."sv, SWAPS_FIELD, BASE_OBJECT_FIELD);
 			return false;
 		}
 		else if (!baseObjectField.isString()) {
-			logger::error("    >Config has swap defined in {} with {}, but it is not a string. Treating config as invalid."sv, NEW_MODELS_FIELD, BASE_OBJECT_FIELD);
+			logger::error("    >Config has swap defined in {} with {}, but it is not a string. Treating config as invalid."sv, SWAPS_FIELD, BASE_OBJECT_FIELD);
 			return false;
 		}
 
@@ -140,6 +146,29 @@ namespace Settings::JSON
 		if (!objectBase) {
 			logger::info("      >Base object not found. This may be normal if the form comes from an optional mod."sv);
 			return true;
+		}
+
+		auto& altModelsField = a_json[ALT_MODELS_FIELD];
+		if (!altModelsField) {
+			logger::error("    >Config has swap defined in {} without {}. Treating config as invalid."sv, SWAPS_FIELD, ALT_MODELS_FIELD);
+			return false;
+		}
+		else if (!altModelsField.isArray()) {
+			logger::error("    >Config has swap defined in {} with {}, but it is not an array. Treating config as invalid."sv, SWAPS_FIELD, ALT_MODELS_FIELD);
+			return false;
+		}
+
+		for (const auto& altMode : altModelsField) {
+			if (!ReadNewModel(altMode, objectBase)) {
+				return false;
+			}
+		}
+	}
+
+	bool Holder::ReadNewModel(const Json::Value& a_json, RE::TESBoundObject* a_base) {
+		if (!a_json.isObject()) {
+			logger::error("    >Element of {} is not an object, treating config as invalid."sv, ALT_MODELS_FIELD);
+			return false;
 		}
 
 		const auto& newModelField = a_json[CONDITIONAL_MODEL_FIELD];
@@ -186,7 +215,7 @@ namespace Settings::JSON
 		const auto& textureSwapField = a_json[ALT_TEXTURE_FIELD];
 		if (textureSwapField) {
 			if (!textureSwapField.isArray()) {
-				logger::error("      >{} has {} specified, but it is not an array. Treating config as invalid."sv, NEW_MODELS_FIELD, ALT_TEXTURE_FIELD);
+				logger::error("      >{} has {} specified, but it is not an array. Treating config as invalid."sv, SWAPS_FIELD, ALT_TEXTURE_FIELD);
 				return false;
 			}
 
@@ -205,7 +234,8 @@ namespace Settings::JSON
 		}
 
 		auto constructedSwap = ModelReplacer::ModelSwap(minCount, newModelPath, results);
-		auto newPair = std::pair<RE::TESBoundObject*, ModelReplacer::ModelSwap>(objectBase, constructedSwap);
+		auto newPair = std::pair<RE::TESBoundObject*, ModelReplacer::ModelSwap>(a_base, constructedSwap);
+		LOG_DEBUG("Constructed rule for {}/{}/{}"sv, a_base->GetName(), minCount, newModelPath);
 		configData.push_back(newPair);
 		return true;
 	}

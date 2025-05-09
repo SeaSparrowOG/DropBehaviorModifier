@@ -1,0 +1,20 @@
+{
+  "MinimumVersion": 1,
+  "Swaps": [
+    {
+      "BaseObject": "Skyrim.esm|0xA",
+      "AltModels": [
+        {
+          "Count": 3,
+          "Model": "SeaSparrow\\DynamicDroppedObjects\\LargeSack.nif",
+          "AltTextures": [
+            {
+              "Target": "MiscSackLargeFlat03:0",
+              "Diffuse": "SeaSparrow\\DynamicDroppedObjects\\LargeBurlapApples.dds"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
