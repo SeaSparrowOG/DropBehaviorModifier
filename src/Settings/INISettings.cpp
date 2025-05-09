@@ -131,7 +131,8 @@ namespace Settings::INI
 			{"Hooks", "bTweakArmors"},
 			{"Hooks", "bTweakWeapons"},
 			{"Hooks", "bTweakBooks"},
-			{"Hooks", "bTweakMiscObjects"}
+			{"Hooks", "bTweakMiscObjects"},
+			{"Hooks", "bTweakSoulGems"}
 		};
 
 		logger::info("Verifying INI settings..."sv);

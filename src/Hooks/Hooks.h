@@ -108,5 +108,13 @@ namespace Hooks
 		inline static std::string setting{ "Hooks|bTweakMiscObjects" };
 	};
 
+	class TESObjectSoulGemHook :
+		public VFuncHookHelper<TESObjectSoulGemHook>
+	{
+	public:
+		inline static std::string hookName{ "Soul Gem hook:"sv };
+		inline static std::string setting{ "Hooks|bTweakSoulGems" };
+	};
+
 	bool Install();
 }

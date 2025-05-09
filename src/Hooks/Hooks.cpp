@@ -41,6 +41,11 @@ namespace Hooks
 			logger::critical("  >Failed to get miscItemManager singleton."sv);
 			nominal = false;
 		}
+		auto* soulGemManager = TESObjectSoulGemHook::GetSingleton();
+		if (!soulGemManager) {
+			logger::critical("  >Failed to get soulGemManager singleton."sv);
+			nominal = false;
+		}
 
 		if (!nominal) {
 			return false;
@@ -51,6 +56,7 @@ namespace Hooks
 			armorManager->Install(RE::Offset::TESObjectARMO::VTABLE) &&
 			weaponManager->Install(RE::Offset::TESObjectWEAP::VTABLE) &&
 			bookManager->Install(RE::Offset::TESObjectBOOK::VTABLE) &&
-			miscItemManager->Install(RE::Offset::TESObjectMISC::VTABLE);
+			miscItemManager->Install(RE::Offset::TESObjectMISC::VTABLE) &&
+			soulGemManager->Install(RE::Offset::TESSoulGem::VTABLE);
 	}
 }

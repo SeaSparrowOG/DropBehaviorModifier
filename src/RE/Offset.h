@@ -29,6 +29,10 @@ namespace RE
 		{
 			constexpr auto VTABLE = REL::ID(189689);
 		}
+		namespace TESSoulGem
+		{
+			constexpr auto VTABLE = REL::ID(189850);
+		}
 
 		// Used by Misc.h
 		namespace NiAVObject

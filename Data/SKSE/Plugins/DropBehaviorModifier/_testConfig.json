@@ -72,6 +72,17 @@
           "Model": "SeaSparrow\\DynamicDroppedObjects\\LargeSack.nif"
         }
       ]
+    },
+
+    // Soul Gem test
+    {
+      "BaseObject": "SoulGemGrand",
+      "AltModels": [
+        {
+          "Count": 3,
+          "Model": "SeaSparrow\\DynamicDroppedObjects\\LargeSack.nif"
+        }
+      ]
     }
   ]
 }
