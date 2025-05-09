@@ -47,7 +47,7 @@ namespace ModelReplacer
 	class Swapper : public ISingleton<Swapper>
 	{
 	public:
-		RE::NiAVObject* AttemptModelSwap(RE::TESObject* a_base, RE::TESObjectREFR* a_ref);
+		RE::NiAVObject* AttemptModelSwap(RE::TESBoundObject* a_base, RE::TESObjectREFR* a_ref);
 
 		SwapRegistrationReport RegisterSwap(RE::TESBoundObject* a_form, ModelSwap a_newSwap);
 

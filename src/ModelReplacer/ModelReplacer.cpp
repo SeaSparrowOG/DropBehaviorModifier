@@ -4,24 +4,36 @@
 
 namespace ModelReplacer
 {
-	RE::NiAVObject* Swapper::AttemptModelSwap(RE::TESObject* a_base,
+	RE::NiAVObject* Swapper::AttemptModelSwap(RE::TESBoundObject* a_base,
 		RE::TESObjectREFR* a_ref)
 	{
-		const auto count = a_ref ? a_ref->extraList.GetCount() : 0;
+		const auto count = a_ref && a_ref->extraList.HasType(RE::ExtraDataType::kCount) ? 
+			a_ref->extraList.GetCount() : 0;
 		if (count == 0) {
 			return nullptr;
 		}
 
-		auto* bound = a_base ? skyrim_cast<RE::TESBoundObject*>(a_base) : nullptr;
-		if (!bound) {
+		// LoadGraphics is also called to set the NiAVObject in the menu's display object.
+		// However, the count is ALWAYS 100. Which "???", but I can get an accurate count
+		// from the item list. Not now, though.
+		auto* ui = RE::UI::GetSingleton();
+		if (ui && (
+			ui->IsMenuOpen(RE::MagicMenu::MENU_NAME) ||
+			ui->IsMenuOpen(RE::GiftMenu::MENU_NAME) ||
+			ui->IsMenuOpen(RE::ContainerMenu::MENU_NAME) ||
+			ui->IsMenuOpen(RE::BarterMenu::MENU_NAME) ||
+			ui->IsMenuOpen(RE::InventoryMenu::MENU_NAME)
+			)) 
+		{
 			return nullptr;
 		}
 
-		auto* bestMatch = BestMatch(bound, count);
+		LOG_DEBUG("Object: {}", Utilities::EDID::GetEditorID(a_base));
+		auto* bestMatch = BestMatch(a_base, count);
 		if (!bestMatch) {
+			LOG_DEBUG("  >No match."sv);
 			return nullptr;
 		}
-
 		return bestMatch->ConstructGraphics();
 	}
 
@@ -39,6 +51,7 @@ namespace ModelReplacer
 
 	ModelSwap* Swapper::BestMatch(RE::TESBoundObject* a_base, int32_t a_count) {
 		if (!m_registeredSwaps.contains(a_base)) {
+			LOG_DEBUG("  Unregistered."sv);
 			return nullptr;
 		}
 
@@ -47,9 +60,11 @@ namespace ModelReplacer
 		for (auto it = candidates.begin(); it != finish; ++it) {
 			auto& swap = *it;
 			if (swap.Matches(a_count)) {
+				LOG_DEBUG("  >Found Graphics"sv);
 				return &swap;
 			}
 		}
+		LOG_DEBUG("  >No matching graphics."sv);
 		return nullptr;
 	}
 
@@ -146,7 +161,8 @@ namespace ModelReplacer
 			}
 		}
 
-		return constructedObject;
+		auto* clone = RE::CloneNiAVObject(constructedObject);
+		return clone;
 	}
 
 	ModelSwap::ModelSwap(int32_t a_count, 

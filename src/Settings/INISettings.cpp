@@ -126,8 +126,12 @@ namespace Settings::INI
 		};
 
 		const StoredSetting expectedSettings[] = {
-			{"Hooks", "bTweakMiscObjects"},
-			{"Hooks", "bTweakAlchemyItems"}
+			{"Hooks", "bTweakAlchemyItems"},
+			{"Hooks", "bTweakIngredients"},
+			{"Hooks", "bTweakArmors"},
+			{"Hooks", "bTweakWeapons"},
+			{"Hooks", "bTweakBooks"},
+			{"Hooks", "bTweakMiscObjects"}
 		};
 
 		logger::info("Verifying INI settings..."sv);

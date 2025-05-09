@@ -2,7 +2,6 @@
 
 #include <xbyak.h>
 
-#include "ModelReplacer/ModelReplacer.h"
 #include "RE/Offset.h"
 
 namespace Hooks 
@@ -12,14 +11,34 @@ namespace Hooks
 		logger::info("Installing Hooks...");
 		bool nominal = true;
 
-		auto* miscManager = TESObjectMiscHook::GetSingleton();
-		if (!miscManager) {
-			logger::critical("  >Failed to get miscManager singleton."sv);
+		auto* alchemyItem = AlchemyItemHook::GetSingleton();
+		if (!alchemyItem) {
+			logger::critical("  >Failed to get alchemyItem singleton."sv);
 			nominal = false;
 		}
-		auto* alchemyItemManager = TESObjectALCIHook::GetSingleton();
-		if (!alchemyItemManager) {
-			logger::critical("  >Failed to get alchemyItemManager singleton."sv);
+		auto* ingredientManager = IngredientItemHook::GetSingleton();
+		if (!ingredientManager) {
+			logger::critical("  >Failed to get ingredientManager singleton."sv);
+			nominal = false;
+		}
+		auto* armorManager = TESObjectArmoHook::GetSingleton();
+		if (!armorManager) {
+			logger::critical("  >Failed to get armorManager singleton."sv);
+			nominal = false;
+		}
+		auto* weaponManager = TESObjectWeaponHook::GetSingleton();
+		if (!weaponManager) {
+			logger::critical("  >Failed to get weaponManager singleton."sv);
+			nominal = false;
+		}
+		auto* bookManager = TESObjectBookHook::GetSingleton();
+		if (!bookManager) {
+			logger::critical("  >Failed to get bookManager singleton."sv);
+			nominal = false;
+		}
+		auto* miscItemManager = TESObjectMiscHook::GetSingleton();
+		if (!miscItemManager) {
+			logger::critical("  >Failed to get miscItemManager singleton."sv);
 			nominal = false;
 		}
 
@@ -27,65 +46,11 @@ namespace Hooks
 			return false;
 		}
 
-		return miscManager->Install(RE::Offset::TESObjectMISC::VTABLE) && 
-			alchemyItemManager->Install(RE::Offset::AlchemyItem::VTABLE);
-	}
-
-    bool TESObjectMiscHook::Install(REL::ID a_vtableAddress) {
-		logger::info("Checking for Misc Objects hook."sv);
-		try {
-			auto response = HookIfNecessary(a_vtableAddress, 0x47, setting, Thunk);
-			if (response.has_value()) {
-				_func = response.value();
-				logger::info("  >Hook installed."sv);
-			}
-			else {
-				logger::info("  >Player disabled this hook."sv);
-			}
-		}
-		catch (std::exception&) {
-			return false;
-		}
-		return true;
-    }
-
-	RE::NiAVObject* TESObjectMiscHook::Thunk(RE::TESObject* a_this, 
-		RE::TESObjectREFR* a_ref)
-	{
-		auto* replacer = ModelReplacer::Swapper::GetSingleton();
-		if (replacer) {
-			auto* response = replacer->AttemptModelSwap(a_this, a_ref);
-			return response ? response : _func(a_this, a_ref);
-		}
-		return _func(a_this, a_ref);
-	}
-
-	inline bool TESObjectALCIHook::Install(REL::ID a_vtableAddress) {
-		logger::info("Checking for Alchemy Item hook."sv);
-		try {
-			auto response = HookIfNecessary(a_vtableAddress, 0x47, setting, Thunk);
-			if (response.has_value()) {
-				_func = response.value();
-				logger::info("  >Hook installed."sv);
-			}
-			else {
-				logger::info("  >Player disabled this hook."sv);
-			}
-		}
-		catch (std::exception&) {
-			return false;
-		}
-		return true;
-	}
-
-	inline RE::NiAVObject* TESObjectALCIHook::Thunk(RE::TESObject* a_this,
-		RE::TESObjectREFR* a_ref) 
-	{
-		auto* replacer = ModelReplacer::Swapper::GetSingleton();
-		if (replacer) {
-			auto* response = replacer->AttemptModelSwap(a_this, a_ref);
-			return response ? response : _func(a_this, a_ref);
-		}
-		return _func(a_this, a_ref);
+		return alchemyItem->Install(RE::Offset::AlchemyItem::VTABLE) &&
+			ingredientManager->Install(RE::Offset::IngredientItem::VTABLE) &&
+			armorManager->Install(RE::Offset::TESObjectARMO::VTABLE) &&
+			weaponManager->Install(RE::Offset::TESObjectWEAP::VTABLE) &&
+			bookManager->Install(RE::Offset::TESObjectBOOK::VTABLE) &&
+			miscItemManager->Install(RE::Offset::TESObjectMISC::VTABLE);
 	}
 }
