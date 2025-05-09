@@ -48,6 +48,7 @@ namespace RE
 		return func(a_path, a_demand, a_out, a_4);
 	}
 
+	// This is also nabbed from PO3's commonlib.
 	NiAVObject* CloneNiAVObject(NiAVObject* a_original)
 	{
 		using func_t = decltype(&CloneNiAVObject);

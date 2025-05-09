@@ -34,7 +34,7 @@ namespace RE
 			constexpr auto VTABLE = REL::ID(189850);
 		}
 
-		// Used by Misc.h
+		// Used by Misc.h. The offsets were nabbed from PO3's commonlib.
 		namespace NiAVObject
 		{
 			constexpr auto Demand = REL::ID(75782);
