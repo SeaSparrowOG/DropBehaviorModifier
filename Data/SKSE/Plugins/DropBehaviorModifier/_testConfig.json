@@ -1,6 +1,8 @@
 {
   "MinimumVersion": 1,
   "Swaps": [
+    // Alt Texture test
+    // Misc Object test
     {
       "BaseObject": "Skyrim.esm|0xA",
       "AltModels": [
@@ -13,6 +15,61 @@
               "Diffuse": "SeaSparrow\\DynamicDroppedObjects\\LargeBurlapApples.dds"
             }
           ]
+        }
+      ]
+    },
+
+    // Weapon test
+    {
+      "BaseObject": "IronSword",
+      "AltModels": [
+        {
+          "Count": 3,
+          "Model": "SeaSparrow\\DynamicDroppedObjects\\LargeSack.nif"
+        }
+      ]
+    },
+
+    // Armor test
+    {
+      "BaseObject": "ArmorIronShield",
+      "AltModels": [
+        {
+          "Count": 3,
+          "Model": "SeaSparrow\\DynamicDroppedObjects\\LargeSack.nif"
+        }
+      ]
+    },
+
+    // Alchemy Item test
+    {
+      "BaseObject": "Ale",
+      "AltModels": [
+        {
+          "Count": 3,
+          "Model": "SeaSparrow\\DynamicDroppedObjects\\LargeSack.nif"
+        }
+      ]
+    },
+
+    // Ingredient test
+    {
+      "BaseObject": "BriarHeart",
+      "AltModels": [
+        {
+          "Count": 3,
+          "Model": "SeaSparrow\\DynamicDroppedObjects\\LargeSack.nif"
+        }
+      ]
+    },
+
+    // Book test
+    {
+      "BaseObject": "SkillBlock1",
+      "AltModels": [
+        {
+          "Count": 3,
+          "Model": "SeaSparrow\\DynamicDroppedObjects\\LargeSack.nif"
         }
       ]
     }
