@@ -34,6 +34,8 @@ namespace Settings
 			std::string ALT_TEXTURE_TARGET_FIELD{ "Target" };
 
 			std::vector<std::pair<RE::TESBoundObject*, ModelReplacer::ModelSwap>> configData{};
+			std::vector<RE::TESBoundObject*>                                      swapForms{};
+
 			bool ReadConfig(const Json::Value& a_json);
 			bool ReadEntry(const Json::Value& a_json);
 			bool ReadNewModel(const Json::Value& a_json, RE::TESBoundObject* a_base);

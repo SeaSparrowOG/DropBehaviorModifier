@@ -5,6 +5,7 @@ namespace Settings::JSON
 	bool Holder::Read()
 	{
 		logger::info("==========================================================");
+		logger::info("JSON parser version: {}", 1);
 		std::string jsonFolder = fmt::format(R"(.\Data\SKSE\Plugins\{})"sv, Plugin::NAME);
 		logger::info("Reading and validating project JSON files in {}.", jsonFolder);
 
@@ -130,22 +131,42 @@ namespace Settings::JSON
 	}
 
 	bool Holder::ReadEntry(const Json::Value& a_json) {
+		if (!swapForms.empty()) {
+			swapForms.clear();
+		}
+
 		const auto& baseObjectField = a_json[BASE_OBJECT_FIELD];
 		if (!baseObjectField) {
 			logger::error("    >Config has swap defined in {} without {}. Treating config as invalid."sv, SWAPS_FIELD, BASE_OBJECT_FIELD);
 			return false;
 		}
-		else if (!baseObjectField.isString()) {
-			logger::error("    >Config has swap defined in {} with {}, but it is not a string. Treating config as invalid."sv, SWAPS_FIELD, BASE_OBJECT_FIELD);
-			return false;
+		
+		if (baseObjectField.isString()) {
+			auto* foundObject = Utilities::Forms::GetFormFromString<RE::TESBoundObject>(baseObjectField.asString());
+			if (!foundObject) {
+				logger::info("    >Field {} specifies form {}, but does not exist in game files. This may be normal."sv, BASE_OBJECT_FIELD, baseObjectField.asString());
+				return true;
+			}
+			swapForms.push_back(foundObject);
 		}
+		else if (baseObjectField.isArray()) {
+			for (const auto& enclosedForm : baseObjectField) {
+				if (!enclosedForm.isString()) {
+					logger::error("    >Field {} contains a non-string form, treating config as invalid."sv, BASE_OBJECT_FIELD);
+					return false;
+				}
 
-		auto baseString = baseObjectField.asString();
-		logger::info("    >Reading {}..."sv, baseString);
-		auto* objectBase = Utilities::Forms::GetFormFromString<RE::TESBoundObject>(baseString);
-		if (!objectBase) {
-			logger::info("      >Base object not found. This may be normal if the form comes from an optional mod."sv);
-			return true;
+				auto* foundObject = Utilities::Forms::GetFormFromString<RE::TESBoundObject>(enclosedForm.asString());
+				if (!foundObject) {
+					logger::info("    >Field {} specifies form {}, but does not exist in game files. This may be normal."sv, BASE_OBJECT_FIELD, enclosedForm.asString());
+					continue;
+				}
+				swapForms.push_back(foundObject);
+			}
+		}
+		else {
+			logger::error("    >Config has {} field, but it is not a string or an array."sv, BASE_OBJECT_FIELD);
+			return false;
 		}
 
 		auto& altModelsField = a_json[ALT_MODELS_FIELD];
@@ -158,11 +179,16 @@ namespace Settings::JSON
 			return false;
 		}
 
-		for (const auto& altMode : altModelsField) {
-			if (!ReadNewModel(altMode, objectBase)) {
-				return false;
+		// All forms in swapForms are non-null TESBoundObject*.
+		// However, altModel has not been verified, so iterate over that first.
+		for (auto* baseObject : swapForms) {
+			for (const auto& altMode : altModelsField) {
+				if (!ReadNewModel(altMode, baseObject)) {
+					return false;
+				}
 			}
 		}
+		return true;
 	}
 
 	bool Holder::ReadNewModel(const Json::Value& a_json, RE::TESBoundObject* a_base) {

@@ -61,6 +61,7 @@ Fields:
         * Formatted String: `Modname.extension|0xFormID`. For example, `Skyrim.esm|0xA` is the form `0xA` in `Skyrim.esm` (a lockpick).
         * EditorID: Alternatively, if you want to make [PowerOfThree's Tweaks](https://www.nexusmods.com/skyrimspecialedition/mods/51073) a master, you can also use EditorIDs. For example, `IronSword`.
         * If a base object is not found, it's not the end of the world. A small warning is printed in the log, but the config is considered valid.
+    * Alternatively, if you want the model swap to apply to multiple objects, you can use an array of strings. Check `Example 4`!
 * AltModels:
     * An array of objects. Each object represents a different model that will get assigned to the form if it has a specified count.
 * Count:
@@ -175,6 +176,34 @@ Example 3:
               "Diffuse": "SeaSparrow\\DynamicDroppedObjects\\RedGemTexture.dds"
             }
           ]
+        }
+      ]
+    }
+  ]
+}
+```
+Example 4:
+- Replace 10+ dropped grand soul gems (filled and non-filled) with a small pouch of soul gems.
+ - This example uses EditorIDs, so it needs PO3's tweaks.
+ - Since there is a single model swap that we want to apply to multiple forms, we are also filling `"BaseObject"` with an array of strings instead of just 1 string.
+ - We are also using some of the new forms from a mod called [Yet Another Soul TrapM anager](https://www.nexusmods.com/skyrimspecialedition/mods/56144). If the mod is not present, the forms will be missing, but it won't cause an error for the user.
+```json
+{
+  "MinimumVersion": 1,
+  "Swaps": [
+    {
+      "BaseObject": [
+        "SoulGemGrand",
+        "SoulGemGrandFilled",
+        "SoulGemGrandFilledPetty",
+        "SoulGemGrandFilledLesser",
+        "SoulGemGrandFilledCommon",
+        "SoulGemGrandFilledGreater"
+      ],
+      "AltModels": [
+        {
+          "Count": 10,
+          "Model": "SeaSparrow\\DynamicDroppedObjects\\SoulGemPouch.nif"
         }
       ]
     }
