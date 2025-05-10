@@ -23,8 +23,23 @@ cmake --build build --config Release
 ```
 
 ## Usage
-On its own, the DLL doesn't do anything. In order to swap models, you need to create a configuration file. Configuration files are `.json` files found in `/Data/SKSE/Plugins/DropBehaviorModifier`. Any `.json` file there will count a as a configuration file, and be evaluated. If any part of it is invalid, it is discarded. If you are developing a companion mod, make sure to check the log found in `Documents/My Games/Skyrim Special Edition/SKSE/DropBehaviorModifier.log` if things are not working as expected, since it points out common mistakes.
-
+On its own, the DLL doesn't do anything. In order to swap models, you need to create a configuration file. . Any `.json` file in `Data/SKSE/Plugins/DropBehaviorModifier` will count a as a configuration file, and be evaluated. If any part of it is invalid, it is discarded. If you are developing a companion mod, make sure to check the log found in `Documents/My Games/Skyrim Special Edition/SKSE/DropBehaviorModifier.log` if things are not working as expected, since it points out common mistakes.
+The end result of the configuration file is to create alternate models for references with a specific base object and a count exceeds a specified number. In plain English, "If this lockpick reference has a count of 5 or more, replace its model with a pouch containing lockpicks.".
+Internally, the plugin maintains a map of `Game Object` to `Alternate Models`. This means that multiple different configuration files can create rules for the same form. So `Mod A` can say "Lockpicks use this model if there are 7 or more present, and this other model if there are 3 or more present.". A theoretical `Mod B` can also say "Lockpicks use this model if there are 15 or more". But what happens when there is a "collision"? For example:
+Example 1:
+- `Mod A` says "Lockpicks use this model if there are 3 or more of them, and this other model if there are 7 or more of them"
+- `Mod B` says "Lockpicks use this model if there are 5 or more of them."
+Intuitively, you can guess how your own config would be handled. If there are 8 lockpicks, use the model for 7 or more, and if there are 4 use the model for 3 or more. `Mod B`, however, expects its own model to always apply if there are 5 or more lockpicks, so what happens? Simply put, the framework doesn't care if they are in different configs, they reference the same base object and are thus subject to the same rule that they would follow if they were in the same config:
+- 7+ count, use 7+ model from `Mod A`.
+- 5 or 6 count, use 5+ model from `Mod B`.
+- 3 or 4 count, use 3+ model from `Mod A`.
+Example 2:
+- `Mod A` says "Lockpicks use this model if there are 3 or more of them, and this other model if there are 10 or more of them".
+- `Mod B` says "Lockpicks use this model if there are 3 or more of them, and this other model if there are 7 or more of them".
+You can already guess what happens for the most part:
+- 10+ count, use 10+ model from `Mod A`.
+- 7, 8, or 9 count, use 7+ model from `Mod B`.
+But what happens if there are 3, 4, 5, or 6? Unfortunately, in that case, one of the configurations *for that count* will be **ignored**. Configurations are read alphabetically, and a single configuration is read from top to bottom. So in this case, if `Mod B` named their configuration `A Better Lockpick Model` and `Mod A` named their `Brilliant Lockpicks`, then `Mod B`'s configuration for the 3+ count will apply instead of `Mod A`'s (but the other counts will apply from both mods).
 ### Configuration - Top Level
 Your JSON file should look like this when you are starting out:
 ```json
@@ -93,9 +108,9 @@ Fields:
 
 ## Configuration - Examples:
 Example 1: 
-- Replace 3+ dropped apples with a bowl with apples.
-- Replace 7+ dropped apples with a bucket with apples.
-- Replace 5+ dropped bread loaves with a basket of bread.
+Replace 3+ dropped apples with a bowl with apples.
+Replace 7+ dropped apples with a bucket with apples.
+Replace 5+ dropped bread loaves with a basket of bread.
 ```json
 {
   "MinimumVersion": 1,
@@ -126,8 +141,8 @@ Example 1:
 }
 ```
 Example 2:
-- Replace 5+ dropped lockpicks with a small pouch.
-- Replace 10+ dropped lockpicks with the same pouch, but use a gold texture!
+Replace 5+ dropped lockpicks with a small pouch.
+Replace 10+ dropped lockpicks with the same pouch, but use a gold texture!
 ```json
 {
   "MinimumVersion": 1,
@@ -155,7 +170,7 @@ Example 2:
 }
 ```
 Example 3:
-- Replace 10+ dropped soul gem fragments with a small mound of soul gem fragments, and make the top objects red in color.
+Replace 10+ dropped soul gem fragments with a small mound of soul gem fragments, and make the top objects red in color.
 ```json
 {
   "MinimumVersion": 1,
@@ -183,10 +198,10 @@ Example 3:
 }
 ```
 Example 4:
-- Replace 10+ dropped grand soul gems (filled and non-filled) with a small pouch of soul gems.
- - This example uses EditorIDs, so it needs PO3's tweaks.
- - Since there is a single model swap that we want to apply to multiple forms, we are also filling `"BaseObject"` with an array of strings instead of just 1 string.
- - We are also using some of the new forms from a mod called [Yet Another Soul TrapM anager](https://www.nexusmods.com/skyrimspecialedition/mods/56144). If the mod is not present, the forms will be missing, but it won't cause an error for the user.
+Replace 10+ dropped grand soul gems (filled and non-filled) with a small pouch of soul gems.
+- This example uses EditorIDs, so it needs PO3's tweaks.
+- Since there is a single model swap that we want to apply to multiple forms, we are also filling `"BaseObject"` with an array of strings instead of just 1 string.
+- The config uses new forms found in [Yet Another Soul Trap Manager](https://www.nexusmods.com/skyrimspecialedition/mods/56144). If the mod is not present, the forms will be missing, but it won't cause an error for the user.
 ```json
 {
   "MinimumVersion": 1,
