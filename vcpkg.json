@@ -1,21 +1,23 @@
 {
-  "name": "replaceme",
+  "name": "drop-behavior-modifier",
   "version-string": "1.0.0",
-  "description": "Template for SKSE plugin built using my commonlib. MIT License by default.",
-  "homepage": "",
+  "description": "SKSE plugin to replace the models of dropped items.",
+  "homepage": "https://github.com/SeaSparrowOG/DropBehaviorModifier",
   "license": "MIT",
   "dependencies": [
+    "boost-stl-interfaces",
+    "fmt",
     "rsm-binary-io",
     "spdlog",
-    "clib-util",
     "jsoncpp",
+    "simpleini",
     "xbyak"
   ],
-  "overrides": [
+    "builtin-baseline": "f9a99aa79c1309001e36572fa42d7d8edebfc451",
+    "overrides": [
     {
-      "name": "fmt",
-      "version": "9.1.0"
+      "name": "xbyak",
+      "version": "7.23.1"
     }
-  ],
-  "builtin-baseline": "b7dba7f9aad09a56900f21cd78cfda1258e54e38"
+  ]
 }
