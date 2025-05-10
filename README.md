@@ -27,19 +27,20 @@ On its own, the DLL doesn't do anything. In order to swap models, you need to cr
 The end result of the configuration file is to create alternate models for references with a specific base object and a count exceeds a specified number. In plain English, "If this lockpick reference has a count of 5 or more, replace its model with a pouch containing lockpicks.".
 Internally, the plugin maintains a map of `Game Object` to `Alternate Models`. This means that multiple different configuration files can create rules for the same form. So `Mod A` can say "Lockpicks use this model if there are 7 or more present, and this other model if there are 3 or more present.". A theoretical `Mod B` can also say "Lockpicks use this model if there are 15 or more". But what happens when there is a "collision"? For example:
 Example 1:
-- `Mod A` says "Lockpicks use this model if there are 3 or more of them, and this other model if there are 7 or more of them"
-- `Mod B` says "Lockpicks use this model if there are 5 or more of them."
+* `Mod A` says "Lockpicks use this model if there are 3 or more of them, and this other model if there are 7 or more of them"
+* `Mod B` says "Lockpicks use this model if there are 5 or more of them."
 Intuitively, you can guess how your own config would be handled. If there are 8 lockpicks, use the model for 7 or more, and if there are 4 use the model for 3 or more. `Mod B`, however, expects its own model to always apply if there are 5 or more lockpicks, so what happens? Simply put, the framework doesn't care if they are in different configs, they reference the same base object and are thus subject to the same rule that they would follow if they were in the same config:
-- 7+ count, use 7+ model from `Mod A`.
-- 5 or 6 count, use 5+ model from `Mod B`.
-- 3 or 4 count, use 3+ model from `Mod A`.
+    * 7+ count, use 7+ model from `Mod A`.
+    * 5 or 6 count, use 5+ model from `Mod B`.
+    * 3 or 4 count, use 3+ model from `Mod A`.
 Example 2:
-- `Mod A` says "Lockpicks use this model if there are 3 or more of them, and this other model if there are 10 or more of them".
-- `Mod B` says "Lockpicks use this model if there are 3 or more of them, and this other model if there are 7 or more of them".
+* `Mod A` says "Lockpicks use this model if there are 3 or more of them, and this other model if there are 10 or more of them".
+* `Mod B` says "Lockpicks use this model if there are 3 or more of them, and this other model if there are 7 or more of them".
 You can already guess what happens for the most part:
-- 10+ count, use 10+ model from `Mod A`.
-- 7, 8, or 9 count, use 7+ model from `Mod B`.
+    * 10+ count, use 10+ model from `Mod A`.
+    * 7, 8, or 9 count, use 7+ model from `Mod B`.
 But what happens if there are 3, 4, 5, or 6? Unfortunately, in that case, one of the configurations *for that count* will be **ignored**. Configurations are read alphabetically, and a single configuration is read from top to bottom. So in this case, if `Mod B` named their configuration `A Better Lockpick Model` and `Mod A` named their `Brilliant Lockpicks`, then `Mod B`'s configuration for the 3+ count will apply instead of `Mod A`'s (but the other counts will apply from both mods).
+
 ### Configuration - Top Level
 Your JSON file should look like this when you are starting out:
 ```json
