@@ -135,6 +135,18 @@ namespace Settings::JSON
 			swapForms.clear();
 		}
 
+		const auto& showInMenusField = a_json[SHOW_IN_MENUS_FIELD];
+		if (showInMenusField) {
+			if (!showInMenusField.isBool()) {
+				logger::error("    >Config has {} defined, but it is not a boolean. Treating config as invalid."sv, SHOW_IN_MENUS_FIELD);
+				return false;
+			}
+			showInMenus = showInMenusField.asBool();
+		}
+		else {
+			showInMenus = false;
+		}
+
 		const auto& baseObjectField = a_json[BASE_OBJECT_FIELD];
 		if (!baseObjectField) {
 			logger::error("    >Config has swap defined in {} without {}. Treating config as invalid."sv, SWAPS_FIELD, BASE_OBJECT_FIELD);
@@ -259,7 +271,7 @@ namespace Settings::JSON
 			}
 		}
 
-		auto constructedSwap = ModelReplacer::ModelSwap(minCount, newModelPath, results);
+		auto constructedSwap = ModelReplacer::ModelSwap(minCount, newModelPath, results, showInMenus);
 		auto newPair = std::pair<RE::TESBoundObject*, ModelReplacer::ModelSwap>(a_base, constructedSwap);
 		LOG_DEBUG("Constructed rule for {}/{}/{}"sv, a_base->GetName(), minCount, newModelPath);
 		configData.push_back(newPair);

@@ -5,7 +5,8 @@
 namespace ModelReplacer
 {
 	RE::NiAVObject* Swapper::AttemptModelSwap(RE::TESBoundObject* a_base,
-		RE::TESObjectREFR* a_ref)
+		RE::TESObjectREFR* a_ref,
+		bool a_replaceInventoryModel)
 	{
 		const auto count = a_ref && a_ref->extraList.HasType(RE::ExtraDataType::kCount) ? 
 			a_ref->extraList.GetCount() : 0;
@@ -30,6 +31,48 @@ namespace ModelReplacer
 			// so this dirty check filters out only the inventory object.
 			const auto* parentCell = a_ref->GetParentCell();
 			if (!parentCell) {
+				if (!a_replaceInventoryModel) {
+					return nullptr;
+				}
+
+				RE::ItemList* currentList = nullptr;
+				uint32_t itemCount = 0;
+
+				if (ui->IsMenuOpen(RE::InventoryMenu::MENU_NAME)) {
+					auto menu = ui->GetMenu<RE::InventoryMenu>();
+					currentList = menu ? menu->itemList : nullptr;
+				}
+				else if (ui->IsMenuOpen(RE::ContainerMenu::MENU_NAME)) {
+					auto menu = ui->GetMenu<RE::ContainerMenu>();
+					currentList = menu ? menu->itemList : nullptr;
+				}
+				else if (ui->IsMenuOpen(RE::GiftMenu::MENU_NAME)) {
+					auto menu = ui->GetMenu<RE::GiftMenu>();
+					currentList = menu ? menu->itemList : nullptr;
+				}
+				else if (ui->IsMenuOpen(RE::BarterMenu::MENU_NAME)) {
+					auto menu = ui->GetMenu<RE::BarterMenu>();
+					currentList = menu ? menu->itemList : nullptr;
+				}
+				else {
+					LOG_DEBUG("Early menu abort"sv);
+					return nullptr;
+				}
+
+				auto* selected = currentList ? currentList->GetSelectedItem() : nullptr;
+				itemCount = selected ? selected->data.GetCount() : 0;
+#ifndef NDEBUG
+				if (itemCount > 1) {
+					LOG_DEBUG("Hovered over [{}] {}s"sv, itemCount, selected->data.GetName());
+				}
+				else {
+					LOG_DEBUG("Invalid count"sv);
+				}
+#endif
+				if (itemCount > 1) {
+					auto* bestMatch = BestMenuMatch(a_base, itemCount);
+					return bestMatch ? bestMatch->ConstructGraphics() : nullptr;
+				}
 				return nullptr;
 			}
 		}
@@ -66,6 +109,27 @@ namespace ModelReplacer
 		for (auto it = candidates.begin(); it != finish; ++it) {
 			auto& swap = *it;
 			if (swap.Matches(a_count)) {
+				LOG_DEBUG("  >Found Graphics"sv);
+				return &swap;
+			}
+		}
+		LOG_DEBUG("  >No matching graphics."sv);
+		return nullptr;
+	}
+
+	ModelSwap* Swapper::BestMenuMatch(RE::TESBoundObject* a_base, 
+		int32_t a_count) 
+	{
+		if (!m_registeredSwaps.contains(a_base)) {
+			LOG_DEBUG("  Unregistered."sv);
+			return nullptr;
+		}
+
+		auto& candidates = m_registeredSwaps[a_base];
+		auto finish = candidates.end();
+		for (auto it = candidates.begin(); it != finish; ++it) {
+			auto& swap = *it;
+			if (swap.CanShowInMenus() && swap.Matches(a_count)) {
 				LOG_DEBUG("  >Found Graphics"sv);
 				return &swap;
 			}
@@ -173,10 +237,12 @@ namespace ModelReplacer
 
 	ModelSwap::ModelSwap(int32_t a_count, 
 		const std::string& a_newModel, 
-		const std::vector<TextureSwap>& a_textureSwaps)
+		const std::vector<TextureSwap>& a_textureSwaps,
+		bool a_showInMenus)
 	{
 		this->requiredCount = a_count;
 		this->altModel = a_newModel;
 		this->altTextures = a_textureSwaps;
+		this->showInMenus = a_showInMenus;
 	}
 }

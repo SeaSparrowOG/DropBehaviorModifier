@@ -58,7 +58,7 @@ namespace Events
 		auto* ref3D = eventRef->Get3D();
 		auto* replacer = ModelReplacer::Swapper::GetSingleton();
 		auto* altModel = replacer ?
-			replacer->AttemptModelSwap(eventBase, eventRef) :
+			replacer->AttemptModelSwap(eventBase, eventRef, false) :
 			nullptr;
 
 		if (ref3D && altModel && altModel->name != ref3D->name) {

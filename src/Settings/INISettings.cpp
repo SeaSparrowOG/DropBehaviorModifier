@@ -126,6 +126,8 @@ namespace Settings::INI
 		};
 
 		const StoredSetting expectedSettings[] = {
+			{"Inventory", "bEnable"},
+
 			{"Hooks", "bTweakAlchemyItems"},
 			{"Hooks", "bTweakIngredients"},
 			{"Hooks", "bTweakArmors"},

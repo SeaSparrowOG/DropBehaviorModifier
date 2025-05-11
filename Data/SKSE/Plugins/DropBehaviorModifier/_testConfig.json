@@ -3,7 +3,9 @@
   "Swaps": [
     // Alt Texture test
     // Misc Object test
+    // Menu test
     {
+      "ShowInMenus": true,
       "BaseObject": "Skyrim.esm|0xA",
       "AltModels": [
         {

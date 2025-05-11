@@ -65,6 +65,7 @@ The following fields should be placed in `"Swaps"`, but the explanation omits th
 ```json
 {
   {
+    "ShowInMenus": false,
     "BaseObject": "",
     "AltModels": [
       {
@@ -77,6 +78,9 @@ The following fields should be placed in `"Swaps"`, but the explanation omits th
 }
 ```
 Fields:
+* ShowInMenus:
+    * An optional bool field. If set to true, then these models will also apply in the inventory, container, barter, and gift menus.
+    * If not present, defaults to `false`.
 * BaseObject:
     * The form that will be assigned a dynamic model. This is a string field. Internally, I call them "formatted" strings, because in order to be valid they need to follow a specific format.
         * Formatted String: `Modname.extension|0xFormID`. For example, `Skyrim.esm|0xA` is the form `0xA` in `Skyrim.esm` (a lockpick).

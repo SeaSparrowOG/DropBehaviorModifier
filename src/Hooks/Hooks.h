@@ -25,12 +25,15 @@ namespace Hooks
 				LOG_DEBUG("Stacked item: [{}]:{}", itemCount, base->GetName());
 			}
 #endif
-			auto* alt = replacer ? replacer->AttemptModelSwap(base, a_ref) : nullptr;
+			auto* alt = replacer ? replacer->AttemptModelSwap(base, a_ref, replaceInventoryModel) : nullptr;
 			return alt ? alt : _func(a_this, a_ref);
 		}
 
 		inline static REL::Relocation<decltype(&Thunk)> _func;
 		inline static constexpr size_t idx{ 0x47 };
+
+		inline static std::string inventorySetting{ "Inventory|bEnable" };
+		inline static bool        replaceInventoryModel{ false };
 
 	public:
 		inline static bool Install(REL::ID a_vtableAddress)
@@ -42,6 +45,12 @@ namespace Hooks
 				logger::critical("    >Failed to fetch ini settings holder."sv);
 				return false;
 			}
+
+			auto enableInventoryRaw = iniHolder->GetStoredSetting<bool>(inventorySetting);
+			if (!enableInventoryRaw.has_value()) {
+				logger::warn("    >Setting {} not found in ini settings, treating as false."sv, inventorySetting);
+			}
+			replaceInventoryModel = enableInventoryRaw.has_value() ? enableInventoryRaw.value() : false;
 
 			auto installRaw = iniHolder->GetStoredSetting<bool>(T::setting);
 			bool install = installRaw.has_value() ? installRaw.value() : false;
@@ -114,6 +123,20 @@ namespace Hooks
 	public:
 		inline static std::string hookName{ "Soul Gem hook:"sv };
 		inline static std::string setting{ "Hooks|bTweakSoulGems" };
+	};
+
+	class Inventory3DManagerHook :
+		public ISingleton<Inventory3DManagerHook> {
+	public:
+		bool Install();
+
+	private:
+		inline static void Thunk(RE::Inventory3DManager* a_this,
+			RE::InventoryEntryData* a_entryData);
+
+		inline static REL::Relocation<decltype(&Thunk)> _func;
+		inline static constexpr size_t offset{ 0x4F };
+		std::string setting{ "Inventory|bEnable" };
 	};
 
 	bool Install();

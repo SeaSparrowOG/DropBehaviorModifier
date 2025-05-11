@@ -27,8 +27,13 @@ namespace ModelReplacer
 		std::vector<TextureSwap> altTextures{};
 		std::string              altModel{};
 		int32_t                  requiredCount{ 100 };
+		bool                     showInMenus{ false };
 
 	public:
+		bool CanShowInMenus() const {
+			return showInMenus;
+		}
+
 		bool Matches(int32_t a_otherCount) const {
 			return a_otherCount >= requiredCount;
 		}
@@ -41,18 +46,23 @@ namespace ModelReplacer
 
 		ModelSwap(int32_t a_count, 
 			const std::string& a_newModel, 
-			const std::vector<TextureSwap>& a_textureSwaps);
+			const std::vector<TextureSwap>& a_textureSwaps,
+			bool a_showInMenus);
 	};
 
 	class Swapper : public ISingleton<Swapper>
 	{
 	public:
-		RE::NiAVObject* AttemptModelSwap(RE::TESBoundObject* a_base, RE::TESObjectREFR* a_ref);
+		RE::NiAVObject* AttemptModelSwap(RE::TESBoundObject* a_base,
+			RE::TESObjectREFR* a_ref,
+			bool a_replaceInventoryModel);
 
 		SwapRegistrationReport RegisterSwap(RE::TESBoundObject* a_form, ModelSwap a_newSwap);
 
 	private:
 		ModelSwap* BestMatch(RE::TESBoundObject* a_base, int32_t a_count);
+		ModelSwap* BestMenuMatch(RE::TESBoundObject* a_base, int32_t a_count);
+
 		SwapRegistrationReport RegisterAdditionalSwap(ModelSwap a_newSwap,
 			std::vector<ModelSwap>& a_oldSwaps);
 

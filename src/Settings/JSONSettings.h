@@ -23,6 +23,7 @@ namespace Settings
 			std::string MIN_VERSION_FIELD{ "MinimumVersion" };
 			std::string SWAPS_FIELD{ "Swaps" };
 
+			std::string SHOW_IN_MENUS_FIELD{ "ShowInMenus" };
 			std::string BASE_OBJECT_FIELD{ "BaseObject" };
 			std::string ALT_MODELS_FIELD{ "AltModels" };
 
@@ -35,6 +36,7 @@ namespace Settings
 
 			std::vector<std::pair<RE::TESBoundObject*, ModelReplacer::ModelSwap>> configData{};
 			std::vector<RE::TESBoundObject*>                                      swapForms{};
+			bool                                                                  showInMenus{ false };
 
 			bool ReadConfig(const Json::Value& a_json);
 			bool ReadEntry(const Json::Value& a_json);

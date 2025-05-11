@@ -1,7 +1,5 @@
 #include "Hooks.h"
 
-#include <xbyak.h>
-
 #include "RE/Offset.h"
 
 namespace Hooks 
@@ -46,10 +44,17 @@ namespace Hooks
 			logger::critical("  >Failed to get soulGemManager singleton."sv);
 			nominal = false;
 		}
+		auto* inventory3DManager = Inventory3DManagerHook::GetSingleton();
+		if (!inventory3DManager) {
+			logger::critical("  >Failed to get inventory3DManager singleton."sv);
+			nominal = false;
+		}
 
 		if (!nominal) {
 			return false;
 		}
+
+		SKSE::AllocTrampoline(14);
 
 		return alchemyItem->Install(RE::Offset::AlchemyItem::VTABLE) &&
 			ingredientManager->Install(RE::Offset::IngredientItem::VTABLE) &&
@@ -57,6 +62,36 @@ namespace Hooks
 			weaponManager->Install(RE::Offset::TESObjectWEAP::VTABLE) &&
 			bookManager->Install(RE::Offset::TESObjectBOOK::VTABLE) &&
 			miscItemManager->Install(RE::Offset::TESObjectMISC::VTABLE) &&
-			soulGemManager->Install(RE::Offset::TESSoulGem::VTABLE);
+			soulGemManager->Install(RE::Offset::TESSoulGem::VTABLE) &&
+			inventory3DManager->Install();
+	}
+
+	bool Inventory3DManagerHook::Install() {
+		logger::info("Inventory 3D Manager:"sv);
+
+		REL::Relocation<std::uintptr_t> target{ REL::ID(51851), offset};
+		if (!(REL::make_pattern<"E9">().match(target.address()))) {
+			SKSE::stl::report_and_fail("Failed to validate pattern of the Inventory 3D Manager."sv);
+		}
+
+		auto& trampoline = SKSE::GetTrampoline();
+		_func = trampoline.write_branch<5>(target.address(), &Thunk);
+
+		return true;
+	}
+
+	inline void Inventory3DManagerHook::Thunk(RE::Inventory3DManager* a_this, 
+		RE::InventoryEntryData* a_entryData)
+	{
+		auto* base = a_entryData ? a_entryData->GetObject() : nullptr;
+		auto* ref = a_this ? a_this->tempRef : nullptr;
+		if (!base || !ref) {
+			_func(a_this, a_entryData);
+			return;
+		}
+
+		a_this->Clear3D();
+		a_this->loadedModels.clear();
+		_func(a_this, a_entryData);
 	}
 }
