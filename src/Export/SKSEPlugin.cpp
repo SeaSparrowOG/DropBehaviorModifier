@@ -3,6 +3,9 @@
 #include "Settings/INISettings.h"
 #include "Settings/JSONSettings.h"
 
+// The magical comment of "I Cannot be bothered for an empty commit"
+// It magically changes when I want to trigger a build action!
+
 namespace
 {
 	void InitializeLog()
