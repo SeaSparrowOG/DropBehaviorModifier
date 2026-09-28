@@ -3,50 +3,19 @@
 #include "Settings/INISettings.h"
 #include "Settings/JSONSettings.h"
 
-// The magical comment of "I Cannot be bothered for an empty commit"
-// It magically changes when I want to trigger a build action!
-
-namespace
-{
-	void InitializeLog()
-	{
-		auto path = logger::log_directory();
-		if (!path) {
-			util::report_and_fail("Failed to find standard logging directory"sv);
-		}
-
-		*path /= fmt::format("{}.log"sv, Plugin::NAME);
-		auto sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(path->string(), true);
-
-#ifndef NDEBUG
-		const auto level = spdlog::level::debug;
-#else 
-		const auto level = spdlog::level::info;
-#endif
-
-		auto log = std::make_shared<spdlog::logger>("global log"s, std::move(sink));
-		log->set_level(level);
-		log->flush_on(level);
-
-		spdlog::set_default_logger(std::move(log));
-		spdlog::set_pattern("[%^%l%$] %v"s);
-	}
-}
-
 extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []()
-	{
-		SKSE::PluginVersionData v{};
+{
+	SKSE::PluginVersionData v{};
 
-		v.PluginVersion(Plugin::VERSION);
-		v.PluginName(Plugin::NAME);
-		v.AuthorName("SeaSparrow"sv);
-		v.UsesAddressLibrary(true);
+	v.PluginVersion(Plugin::VERSION);
+	v.PluginName(Plugin::NAME);
+	v.AuthorName("SeaSparrow"sv);
+	v.UsesAddressLibrary(true);
 
-		return v;
-	}();
+	return v;
+}();
 
-extern "C" DLLEXPORT bool SKSEAPI
-SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info)
+SKSE_PLUGIN_QUERY(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info)
 {
 	a_info->infoVersion = SKSE::PluginInfo::kVersion;
 	a_info->name = Plugin::NAME.data();
@@ -55,12 +24,6 @@ SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info)
 	if (a_skse->IsEditor()) {
 		return false;
 	}
-
-	const auto ver = a_skse->RuntimeVersion();
-	if (ver < SKSE::RUNTIME_1_6_1130) {
-		return false;
-	}
-
 	return true;
 }
 
@@ -71,33 +34,60 @@ static void MessageEventCallback(SKSE::MessagingInterface::Message* a_msg)
 		if (!Settings::JSON::Holder::GetSingleton()->Read()) {
 			SKSE::stl::report_and_fail("Failed to read JSON settings."sv);
 		}
-		logger::info("==========================================================");
+		REX::INFO("==========================================================");
 		if (!Events::Install()) {
 			SKSE::stl::report_and_fail("Failed to register event listeners."sv);
 		}
-		logger::info("==========================================================");
-		logger::info("Startup tasks finished, enjoy your game!");
+		REX::INFO("==========================================================");
+		REX::INFO("Startup tasks finished, enjoy your game!");
 		break;
 	default:
 		break;
 	}
 }
 
-extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
+SKSE_PLUGIN_LOAD(const SKSE::LoadInterface* a_skse)
 {
-	InitializeLog();
-	logger::info("=================================================");
-	logger::info("{} v{}"sv, Plugin::NAME, Plugin::VERSION.string());
-	logger::info("Author: SeaSparrow"sv);
-	logger::info("=================================================");
-	SKSE::Init(a_skse);
+	SKSE::InitInfo info;
+	info.log = true;
+	info.hook = true;
+	info.trampoline = true;
+	info.trampolineSize = 14u;
+	
+	SKSE::Init(a_skse, info);
+	REX::INFO("Author: SeaSparrow"sv);
+	SECTION_SEPARATOR;
 
 	const auto ver = a_skse->RuntimeVersion();
-	if (ver < SKSE::RUNTIME_1_6_1130) {
-		return false;
+
+#ifdef SKYRIM_GOG
+	static constexpr std::array<REL::Version, 4> supported = 
+	{
+		SKSE::RUNTIME_SSE_1_6_1130,
+		SKSE::RUNTIME_SSE_1_6_1170,
+		SKSE::RUNTIME_SSE_1_6_1179,
+		REL::Version(1, 6, 1179, 1) // no idea what this is still
+	};
+#else
+	static constexpr std::array<REL::Version, 2> supported = 
+	{
+		SKSE::RUNTIME_SSE_1_7_104,
+		SKSE::RUNTIME_SSE_1_7_99
+	};	
+#endif
+
+	if ((ver < SKSE::RUNTIME_SSE_LATEST) && (!std::ranges::contains(supported, ver))) {
+		REX::CRITICAL("Game Version: {}"sv, ver.string());
+		REX::CRITICAL("Supported Versions:"sv);
+		for (const auto& allowed : supported) {
+			REX::CRITICAL("  - {}"sv, allowed.string());
+		}
+		REX::FAIL(
+			fmt::format("You are using a version not supported by this plugin. Check the log at (Documents/My Games/Skyrim Special Edition/{}.log for more information."sv, Plugin::NAME)
+		);
 	}
 
-	logger::info("Performing startup tasks..."sv);
+	REX::INFO("Performing startup tasks..."sv);
 	if (!Settings::INI::Holder::GetSingleton()->Read()) {
 		SKSE::stl::report_and_fail("Failed to read INI settings."sv);
 	}

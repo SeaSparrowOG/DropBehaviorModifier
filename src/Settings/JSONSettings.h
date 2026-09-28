@@ -14,7 +14,7 @@ namespace Settings
 		};
 
 		class Holder : 
-			public ISingleton<Holder>
+			public REX::TSingleton<Holder>
 		{
 		public:
 			bool Read();

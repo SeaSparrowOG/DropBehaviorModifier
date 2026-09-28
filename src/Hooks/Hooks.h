@@ -11,7 +11,7 @@ namespace Hooks
 	/// <typeparam name="T">CRTP. Use the class you are instantiating. Used to give each derived class a unique _func.</typeparam>
 	template <typename T>
 	class VFuncHookHelper :
-		public ISingleton<T>
+		public REX::TSingleton<T>
 	{
 	private:
 		inline static RE::NiAVObject* Thunk(RE::TESObject* a_this,
@@ -38,33 +38,33 @@ namespace Hooks
 	public:
 		inline static bool Install(REL::ID a_vtableAddress)
 		{
-			logger::info("{}"sv, T::hookName);
-			logger::info("  >Checking INI to see if hook should be installed."sv);
+			REX::INFO("{}"sv, T::hookName);
+			REX::INFO("  >Checking INI to see if hook should be installed."sv);
 			auto* iniHolder = Settings::INI::Holder::GetSingleton();
 			if (!iniHolder) {
-				logger::critical("    >Failed to fetch ini settings holder."sv);
+				REX::CRITICAL("    >Failed to fetch ini settings holder."sv);
 				return false;
 			}
 
 			auto enableInventoryRaw = iniHolder->GetStoredSetting<bool>(inventorySetting);
 			if (!enableInventoryRaw.has_value()) {
-				logger::warn("    >Setting {} not found in ini settings, treating as false."sv, inventorySetting);
+				REX::WARN("    >Setting {} not found in ini settings, treating as false."sv, inventorySetting);
 			}
 			replaceInventoryModel = enableInventoryRaw.has_value() ? enableInventoryRaw.value() : false;
 
 			auto installRaw = iniHolder->GetStoredSetting<bool>(T::setting);
 			bool install = installRaw.has_value() ? installRaw.value() : false;
 			if (!installRaw.has_value()) {
-				logger::warn("    >Setting {} not found in ini settings, treating as false.", T::setting.c_str());
+				REX::WARN("    >Setting {} not found in ini settings, treating as false.", T::setting.c_str());
 			}
 			if (!install) {
-				logger::info("    >Hook not installed."sv);
+				REX::INFO("    >Hook not installed."sv);
 				return true;
 			}
 
 			REL::Relocation<std::uintptr_t> VTABLE{ a_vtableAddress };
 			_func = VTABLE.write_vfunc(idx, Thunk);
-			logger::info("    >Hook installed."sv);
+			REX::INFO("    >Hook installed."sv);
 			return true;
 		}
 	};
@@ -126,7 +126,7 @@ namespace Hooks
 	};
 
 	class Inventory3DManagerHook :
-		public ISingleton<Inventory3DManagerHook> {
+		public REX::TSingleton<Inventory3DManagerHook> {
 	public:
 		bool Install();
 
