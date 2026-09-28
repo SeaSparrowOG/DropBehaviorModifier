@@ -4,10 +4,10 @@ namespace Settings::JSON
 {
 	bool Holder::Read()
 	{
-		logger::info("==========================================================");
-		logger::info("JSON parser version: {}", 1);
+		REX::INFO("==========================================================");
+		REX::INFO("JSON parser version: {}", 1);
 		std::string jsonFolder = fmt::format(R"(.\Data\SKSE\Plugins\{})"sv, Plugin::NAME);
-		logger::info("Reading and validating project JSON files in {}.", jsonFolder);
+		REX::INFO("Reading and validating project JSON files in {}.", jsonFolder);
 
 		std::vector<std::string> paths{};
 		try {
@@ -18,20 +18,20 @@ namespace Settings::JSON
 			}
 
 			std::sort(paths.begin(), paths.end());
-			logger::info("  >Found {} configuration files."sv, std::to_string(paths.size()));
+			REX::INFO("  >Found {} configuration files."sv, std::to_string(paths.size()));
 		}
 		catch (const std::exception& e) {
-			logger::warn("Caught {} while reading files.", e.what());
+			REX::WARN("Caught {} while reading files.", e.what());
 			return false;
 		}
 		if (paths.empty()) {
-			logger::info("No settings found");
+			REX::INFO("No settings found");
 			return true;
 		}
 
 		auto* modelReplacer = ModelReplacer::Swapper::GetSingleton();
 		if (!modelReplacer) {
-			logger::critical("  >Failed to get internal model replacer singleton."sv);
+			REX::CRITICAL("  >Failed to get internal model replacer singleton."sv);
 			return false;
 		}
 
@@ -47,9 +47,9 @@ namespace Settings::JSON
 				}
 #endif
 				JSONReader.parse(rawJSON, JSONFile);
-				logger::info("  >Reading config {}..."sv, filename);
+				REX::INFO("  >Reading config {}..."sv, filename);
 				if (JSONFile.empty()) {
-					logger::warn("  >Failed to read config {}."sv, filename);
+					REX::WARN("  >Failed to read config {}."sv, filename);
 					continue;
 				}
 
@@ -63,10 +63,10 @@ namespace Settings::JSON
 					}
 				}
 				catch (Json::Exception& e) {
-					logger::warn("    >Caught {} while reading file. File will be ignored."sv, e.what());
+					REX::WARN("    >Caught {} while reading file. File will be ignored."sv, e.what());
 				}
 				catch (std::exception& e) {
-					logger::warn("    >Caught unexpected exception {} while reading file. This should be reported to the mod page."sv, e.what());
+					REX::WARN("    >Caught unexpected exception {} while reading file. This should be reported to the mod page."sv, e.what());
 				}
 
 				for (auto& [base, data] : configData) {
@@ -75,48 +75,48 @@ namespace Settings::JSON
 				}
 			}
 			catch (const Json::Exception& e) {
-				logger::warn("Caught {} while reading files.", e.what());
+				REX::WARN("Caught {} while reading files.", e.what());
 				continue;
 			}
 			catch (const std::exception& e) {
-				logger::error("Caught unhandled exception {} while reading files.", e.what());
+				REX::ERROR("Caught unhandled exception {} while reading files.", e.what());
 				continue;
 			}
 		}
 
-		logger::info("Finished reading all settings."sv);
+		REX::INFO("Finished reading all settings."sv);
 		return true;
 	}
 
 	bool Holder::ReadConfig(const Json::Value& a_json) {
 		if (!a_json.isObject()) {
-			logger::warn("    >Expected Object at top level, config is invalid and will be skipped."sv);
+			REX::WARN("    >Expected Object at top level, config is invalid and will be skipped."sv);
 			return false;
 		}
 
 		const auto& minVersionField = a_json[MIN_VERSION_FIELD];
 		if (!minVersionField) {
-			logger::info("    >Failed to fetch {}, treating as 1."sv, MIN_VERSION_FIELD);
+			REX::INFO("    >Failed to fetch {}, treating as 1."sv, MIN_VERSION_FIELD);
 		}
 		else if (!minVersionField.isInt()) {
-			logger::error("    >{} was specified, but was not an integer. Config will be treated as invalid and skipped."sv, MIN_VERSION_FIELD);
+			REX::ERROR("    >{} was specified, but was not an integer. Config will be treated as invalid and skipped."sv, MIN_VERSION_FIELD);
 			return false;
 		}
 		else if (minVersionField.asInt() < 1) {
-			logger::info("    >Config has {} specified, but it is less than 1. Treating as 1."sv, MIN_VERSION_FIELD);
+			REX::INFO("    >Config has {} specified, but it is less than 1. Treating as 1."sv, MIN_VERSION_FIELD);
 		}
 		else if (minVersionField.asInt() > 1) {
-			logger::error("    >Config has {} specified, and requires a newer version of {}. Update on Nexus."sv, MIN_VERSION_FIELD, Plugin::NAME);
+			REX::ERROR("    >Config has {} specified, and requires a newer version of {}. Update on Nexus."sv, MIN_VERSION_FIELD, Plugin::NAME);
 			return false;
 		}
 
 		const auto& newSwapsField = a_json[SWAPS_FIELD];
 		if (!newSwapsField) {
-			logger::error("    >Config does not have {} specified."sv, SWAPS_FIELD);
+			REX::ERROR("    >Config does not have {} specified."sv, SWAPS_FIELD);
 			return false;
 		}
 		else if (!newSwapsField.isArray()) {
-			logger::error("    >Config has {}, but it is not an array. Treating config as invalid."sv, SWAPS_FIELD);
+			REX::ERROR("    >Config has {}, but it is not an array. Treating config as invalid."sv, SWAPS_FIELD);
 			return false;
 		}
 		
@@ -126,7 +126,7 @@ namespace Settings::JSON
 			}
 		}
 
-		logger::info("    >Finished. Constructed {} swaps from config."sv, configData.size());
+		REX::INFO("    >Finished. Constructed {} swaps from config."sv, configData.size());
 		return true;
 	}
 
@@ -138,7 +138,7 @@ namespace Settings::JSON
 		const auto& showInMenusField = a_json[SHOW_IN_MENUS_FIELD];
 		if (showInMenusField) {
 			if (!showInMenusField.isBool()) {
-				logger::error("    >Config has {} defined, but it is not a boolean. Treating config as invalid."sv, SHOW_IN_MENUS_FIELD);
+				REX::ERROR("    >Config has {} defined, but it is not a boolean. Treating config as invalid."sv, SHOW_IN_MENUS_FIELD);
 				return false;
 			}
 			showInMenus = showInMenusField.asBool();
@@ -149,14 +149,14 @@ namespace Settings::JSON
 
 		const auto& baseObjectField = a_json[BASE_OBJECT_FIELD];
 		if (!baseObjectField) {
-			logger::error("    >Config has swap defined in {} without {}. Treating config as invalid."sv, SWAPS_FIELD, BASE_OBJECT_FIELD);
+			REX::ERROR("    >Config has swap defined in {} without {}. Treating config as invalid."sv, SWAPS_FIELD, BASE_OBJECT_FIELD);
 			return false;
 		}
 		
 		if (baseObjectField.isString()) {
 			auto* foundObject = Utilities::Forms::GetFormFromString<RE::TESBoundObject>(baseObjectField.asString());
 			if (!foundObject) {
-				logger::info("    >Field {} specifies form {}, but does not exist in game files. This may be normal."sv, BASE_OBJECT_FIELD, baseObjectField.asString());
+				REX::INFO("    >Field {} specifies form {}, but does not exist in game files. This may be normal."sv, BASE_OBJECT_FIELD, baseObjectField.asString());
 				return true;
 			}
 			swapForms.push_back(foundObject);
@@ -164,30 +164,30 @@ namespace Settings::JSON
 		else if (baseObjectField.isArray()) {
 			for (const auto& enclosedForm : baseObjectField) {
 				if (!enclosedForm.isString()) {
-					logger::error("    >Field {} contains a non-string form, treating config as invalid."sv, BASE_OBJECT_FIELD);
+					REX::ERROR("    >Field {} contains a non-string form, treating config as invalid."sv, BASE_OBJECT_FIELD);
 					return false;
 				}
 
 				auto* foundObject = Utilities::Forms::GetFormFromString<RE::TESBoundObject>(enclosedForm.asString());
 				if (!foundObject) {
-					logger::info("    >Field {} specifies form {}, but does not exist in game files. This may be normal."sv, BASE_OBJECT_FIELD, enclosedForm.asString());
+					REX::INFO("    >Field {} specifies form {}, but does not exist in game files. This may be normal."sv, BASE_OBJECT_FIELD, enclosedForm.asString());
 					continue;
 				}
 				swapForms.push_back(foundObject);
 			}
 		}
 		else {
-			logger::error("    >Config has {} field, but it is not a string or an array."sv, BASE_OBJECT_FIELD);
+			REX::ERROR("    >Config has {} field, but it is not a string or an array."sv, BASE_OBJECT_FIELD);
 			return false;
 		}
 
 		auto& altModelsField = a_json[ALT_MODELS_FIELD];
 		if (!altModelsField) {
-			logger::error("    >Config has swap defined in {} without {}. Treating config as invalid."sv, SWAPS_FIELD, ALT_MODELS_FIELD);
+			REX::ERROR("    >Config has swap defined in {} without {}. Treating config as invalid."sv, SWAPS_FIELD, ALT_MODELS_FIELD);
 			return false;
 		}
 		else if (!altModelsField.isArray()) {
-			logger::error("    >Config has swap defined in {} with {}, but it is not an array. Treating config as invalid."sv, SWAPS_FIELD, ALT_MODELS_FIELD);
+			REX::ERROR("    >Config has swap defined in {} with {}, but it is not an array. Treating config as invalid."sv, SWAPS_FIELD, ALT_MODELS_FIELD);
 			return false;
 		}
 
@@ -205,17 +205,17 @@ namespace Settings::JSON
 
 	bool Holder::ReadNewModel(const Json::Value& a_json, RE::TESBoundObject* a_base) {
 		if (!a_json.isObject()) {
-			logger::error("    >Element of {} is not an object, treating config as invalid."sv, ALT_MODELS_FIELD);
+			REX::ERROR("    >Element of {} is not an object, treating config as invalid."sv, ALT_MODELS_FIELD);
 			return false;
 		}
 
 		const auto& newModelField = a_json[CONDITIONAL_MODEL_FIELD];
 		if (!newModelField) {
-			logger::error("      >Missing {}. Treating config as invalid."sv, CONDITIONAL_MODEL_FIELD);
+			REX::ERROR("      >Missing {}. Treating config as invalid."sv, CONDITIONAL_MODEL_FIELD);
 			return false;
 		}
 		else if (!newModelField.isString()) {
-			logger::error("      >{} is present, but not a string. Treating config as invalid."sv, CONDITIONAL_MODEL_FIELD);
+			REX::ERROR("      >{} is present, but not a string. Treating config as invalid."sv, CONDITIONAL_MODEL_FIELD);
 			return false;
 		}
 
@@ -223,29 +223,29 @@ namespace Settings::JSON
 		auto newModelPath = Utilities::String::tolower(newModelPathRaw);
 
 		if (!std::regex_match(newModelPath.c_str(), std::regex(R"(^((?!meshes\\).)*\\([^\\\n]*\.nif)$)"))) {
-			logger::error("      >Provided field {} <{}> is invalid. Treating config as invalid."sv, CONDITIONAL_MODEL_FIELD, newModelPathRaw);
+			REX::ERROR("      >Provided field {} <{}> is invalid. Treating config as invalid."sv, CONDITIONAL_MODEL_FIELD, newModelPathRaw);
 			return false;
 		}
 
 		std::string fullPath = "meshes\\" + newModelPath;
 		if (!RE::BSResourceNiBinaryStream(fullPath.c_str()).good()) {
-			logger::warn("      >Provided filed {} has path <{}> that could not be resolved. This may be normal if it comes from an optional mod."sv, CONDITIONAL_MODEL_FIELD, newModelPathRaw);
+			REX::WARN("      >Provided filed {} has path <{}> that could not be resolved. This may be normal if it comes from an optional mod."sv, CONDITIONAL_MODEL_FIELD, newModelPathRaw);
 			return true;
 		}
 
 		const auto& condCountField = a_json[CONDITIONAL_COUNT_FIELD];
 		if (!condCountField) {
-			logger::error("      >Could not fetch the {} field. Treating config as invalid."sv, CONDITIONAL_COUNT_FIELD);
+			REX::ERROR("      >Could not fetch the {} field. Treating config as invalid."sv, CONDITIONAL_COUNT_FIELD);
 			return false;
 		}
 		else if (!condCountField.isInt()) {
-			logger::error("      >Entry has {} specified, but it is not an int. Treating config as invalid."sv, CONDITIONAL_COUNT_FIELD);
+			REX::ERROR("      >Entry has {} specified, but it is not an int. Treating config as invalid."sv, CONDITIONAL_COUNT_FIELD);
 			return false;
 		}
 
 		const auto minCount = condCountField.asInt();
 		if (minCount < 1) {
-			logger::error("      >Provided {} is less than 1, which is not supported. Treating config as invalid."sv, CONDITIONAL_COUNT_FIELD);
+			REX::ERROR("      >Provided {} is less than 1, which is not supported. Treating config as invalid."sv, CONDITIONAL_COUNT_FIELD);
 			return false;
 		}
 
@@ -253,18 +253,18 @@ namespace Settings::JSON
 		const auto& textureSwapField = a_json[ALT_TEXTURE_FIELD];
 		if (textureSwapField) {
 			if (!textureSwapField.isArray()) {
-				logger::error("      >{} has {} specified, but it is not an array. Treating config as invalid."sv, SWAPS_FIELD, ALT_TEXTURE_FIELD);
+				REX::ERROR("      >{} has {} specified, but it is not an array. Treating config as invalid."sv, SWAPS_FIELD, ALT_TEXTURE_FIELD);
 				return false;
 			}
 
 			const auto size = textureSwapField.size();
 			results.reserve(size);
 
-			logger::info("      >{} found, reading {} swaps...", ALT_TEXTURE_FIELD, size);
+			REX::INFO("      >{} found, reading {} swaps...", ALT_TEXTURE_FIELD, size);
 			auto opResult = PopulateTextureSwaps(textureSwapField, results);
 
 			if (opResult == InternalResponse::kNoOp) {
-				logger::warn("        >{} field had no valid texture swaps. This may be normal if they are part of an optional mod."sv, ALT_TEXTURE_FIELD);
+				REX::WARN("        >{} field had no valid texture swaps. This may be normal if they are part of an optional mod."sv, ALT_TEXTURE_FIELD);
 			}
 			else if (opResult == InternalResponse::kFailure) {
 				return false;
@@ -284,46 +284,46 @@ namespace Settings::JSON
 		auto response = InternalResponse::kNoOp;
 		for (const auto& swap : a_json) {
 			if (!swap.isObject()) {
-				logger::error("          >Entry is not an object, treating config as invalid."sv);
+				REX::ERROR("          >Entry is not an object, treating config as invalid."sv);
 				return InternalResponse::kFailure;
 			}
 
 			const auto& newTexturePathField = swap[ALT_TEXTURE_PATH_FIELD];
 			if (!newTexturePathField) {
-				logger::error("          >Entry does not have a {} field, treating config as invalid."sv, ALT_TEXTURE_PATH_FIELD);
+				REX::ERROR("          >Entry does not have a {} field, treating config as invalid."sv, ALT_TEXTURE_PATH_FIELD);
 				return InternalResponse::kFailure;
 			}
 			else if (!newTexturePathField.isString()) {
-				logger::error("          >Entry has {}, but it is not a string. Treating config as invalid."sv, ALT_TEXTURE_PATH_FIELD);
+				REX::ERROR("          >Entry has {}, but it is not a string. Treating config as invalid."sv, ALT_TEXTURE_PATH_FIELD);
 				return InternalResponse::kFailure;
 			}
 
 			auto newTexturePathRaw = newTexturePathField.asString();
 			if (!std::regex_match(newTexturePathRaw.c_str(), std::regex(R"(^((?!tex\\).)*\\([^\\\n]*\.dds)$)"))) {
-				logger::error("          >Provided field {} <{}> is invalid. Treating config as invalid."sv, ALT_TEXTURE_PATH_FIELD, newTexturePathRaw);
+				REX::ERROR("          >Provided field {} <{}> is invalid. Treating config as invalid."sv, ALT_TEXTURE_PATH_FIELD, newTexturePathRaw);
 				return InternalResponse::kFailure;
 			}
 
 			auto newTexturePath = "textures\\" + newTexturePathRaw;
 			newTexturePath = Utilities::String::tolower(newTexturePath);
 			if (!RE::BSResourceNiBinaryStream(newTexturePath.c_str()).good()) {
-				logger::warn("          >Path <{}> could not be resolved. This may be normal if it comes from an optional mod."sv, newTexturePathRaw);
+				REX::WARN("          >Path <{}> could not be resolved. This may be normal if it comes from an optional mod."sv, newTexturePathRaw);
 				continue;
 			}
 
 			const auto& targetField = swap[ALT_TEXTURE_TARGET_FIELD];
 			if (!targetField) {
-				logger::error("          >Entry does not have a {} field, treating config as invalid."sv, ALT_TEXTURE_TARGET_FIELD);
+				REX::ERROR("          >Entry does not have a {} field, treating config as invalid."sv, ALT_TEXTURE_TARGET_FIELD);
 				return InternalResponse::kFailure;
 			}
 			else if (!targetField.isString()) {
-				logger::error("          >Entry has {}, but it is not a string. Treating config as invalid."sv, ALT_TEXTURE_TARGET_FIELD);
+				REX::ERROR("          >Entry has {}, but it is not a string. Treating config as invalid."sv, ALT_TEXTURE_TARGET_FIELD);
 				return InternalResponse::kFailure;
 			}
 
 			auto nodePath = Utilities::String::split(targetField.asString(), "|");
 			if (nodePath.empty()) {
-				logger::warn("          >Entry with node path {} failed to return a proper node path. This is potentially an error, but won't invalidate the config."sv, targetField.asString());
+				REX::WARN("          >Entry with node path {} failed to return a proper node path. This is potentially an error, but won't invalidate the config."sv, targetField.asString());
 				continue;
 			}
 

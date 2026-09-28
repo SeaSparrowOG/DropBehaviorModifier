@@ -1,9 +1,9 @@
 #include "INISettings.h"
 
 #include <SimpleIni.h>
-// I fucking love imports defining macros and imposing them in header files IT IS SO FUCKING FUN SDFHUJIVPAS
 #undef max
 #undef min
+#undef ERROR
 
 namespace Settings::INI
 {
@@ -13,8 +13,8 @@ namespace Settings::INI
         std::string iniPath = fmt::format(R"(.\Data\SKSE\Plugins\{}.ini)"sv, Plugin::NAME);
 		CSimpleIniA ini{};
 		size_t settingCount = 0;
-		logger::info("==========================================================");
-		logger::info("Reading and validating INI settings from {}.ini"sv, Plugin::NAME);
+		REX::INFO("==========================================================");
+		REX::INFO("Reading and validating INI settings from {}.ini"sv, Plugin::NAME);
 
 		try {
 			ini.SetUnicode();
@@ -24,7 +24,7 @@ namespace Settings::INI
 			ini.GetAllSections(sections);
 
 			if (sections.empty()) {
-				logger::warn("  >Finished reading INI file, but found no settings. This MAY be normal.");
+				REX::WARN("  >Finished reading INI file, but found no settings. This MAY be normal.");
 				return true;
 			}
 
@@ -33,7 +33,7 @@ namespace Settings::INI
 				ini.GetAllKeys(section.pItem, sectionKeys);
 
 				if (sectionKeys.empty()) {
-					logger::warn("  >INI section {} has no settings. This MAY be normal.", section.pItem);
+					REX::WARN("  >INI section {} has no settings. This MAY be normal.", section.pItem);
 					continue;
 				}
 
@@ -42,7 +42,7 @@ namespace Settings::INI
 					const std::string foundSetting = fmt::format<std::string>("{}|{}"sv, section.pItem, key.pItem);
 					const auto settingKeyName = std::string(key.pItem);
 					if (settingKeyName.size() < 1) {
-						logger::error("  >Invalid setting in section {}."sv, key.pItem, section.pItem);
+						REX::ERROR("  >Invalid setting in section {}."sv, key.pItem, section.pItem);
 						encounteredError = true;
 						continue;
 					}
@@ -51,11 +51,11 @@ namespace Settings::INI
 					if (settingType == "s") {
 						const std::string value = ini.GetValue(section.pItem, key.pItem);
 						if (value.empty()) {
-							logger::error("  >Invalid value in string setting {}."sv, foundSetting);
+							REX::ERROR("  >Invalid value in string setting {}."sv, foundSetting);
 							encounteredError = true;
 						}
 						else if (stringSettings.contains(foundSetting)) {
-							logger::error("  >Setting redefinition {}."sv, foundSetting);
+							REX::ERROR("  >Setting redefinition {}."sv, foundSetting);
 							encounteredError = true;
 						}
 
@@ -69,7 +69,7 @@ namespace Settings::INI
 								std::numeric_limits<float>::min() :
 								static_cast<float>(raw);
 						if (floatSettings.contains(foundSetting)) {
-							logger::error("  >Setting redefinition {}."sv, foundSetting);
+							REX::ERROR("  >Setting redefinition {}."sv, foundSetting);
 							encounteredError = true;
 						}
 
@@ -77,7 +77,7 @@ namespace Settings::INI
 					}
 					else if (settingType == "b") {
 						if (boolSettings.contains(foundSetting)) {
-							logger::error("  >Setting redefinition {}."sv, foundSetting);
+							REX::ERROR("  >Setting redefinition {}."sv, foundSetting);
 							encounteredError = true;
 						}
 
@@ -86,28 +86,28 @@ namespace Settings::INI
 					else if (settingType == "i") {
 						const long value = ini.GetLongValue(section.pItem, key.pItem);
 						if (longSettings.contains(foundSetting)) {
-							logger::error("  >Setting redefinition {}."sv, foundSetting);
+							REX::ERROR("  >Setting redefinition {}."sv, foundSetting);
 							encounteredError = true;
 						}
 
 						longSettings.emplace(foundSetting, value);
 					}
 					else {
-						logger::error("  >Invalid setting {}. Settings must be prefixed by s, f, b, or i."sv, foundSetting);
+						REX::ERROR("  >Invalid setting {}. Settings must be prefixed by s, f, b, or i."sv, foundSetting);
 						encounteredError = true;
 					}
 				}
 			}
 		}
 		catch (std::exception& e) {
-			logger::error("Caught exception {} while fetching INI settings.", e.what());
+			REX::ERROR("Caught exception {} while fetching INI settings.", e.what());
 			return false;
 		}
 
-		logger::info("  >Finished reading {} settings.", std::to_string(settingCount));
+		REX::INFO("  >Finished reading {} settings.", std::to_string(settingCount));
 
 		if (encounteredError) {
-			logger::info("Errors were encountered while reading the INI file. See log for more details."sv);
+			REX::INFO("Errors were encountered while reading the INI file. See log for more details."sv);
 			return false;
 		}
 
@@ -137,7 +137,7 @@ namespace Settings::INI
 			{"Hooks", "bTweakSoulGems"}
 		};
 
-		logger::info("Verifying INI settings..."sv);
+		REX::INFO("Verifying INI settings..."sv);
 
 		std::string iniPath = fmt::format(R"(.\Data\SKSE\Plugins\{}.ini)"sv, Plugin::NAME);
 		CSimpleIniA ini{};
@@ -149,29 +149,29 @@ namespace Settings::INI
 			for (const auto& setting : expectedSettings) {
 				if (!ini.KeyExists(setting.section.c_str(), setting.key.c_str())) {
 					iniGood = false;
-					logger::error("  >Missing key {} in section {}"sv, setting.key, setting.section);
+					REX::ERROR("  >Missing key {} in section {}"sv, setting.key, setting.section);
 				}
 			}
 		}
 		catch (std::exception& e) {
-			logger::error("Caught exception {} while validating ini settings."sv, e.what());
+			REX::ERROR("Caught exception {} while validating ini settings."sv, e.what());
 			return false;
 		}
 
 		if (!iniGood) {
-			logger::info("Failed to validate one or more settings."sv);
+			REX::INFO("Failed to validate one or more settings."sv);
 			return false;
 		}
-		logger::info("Successfully verified INI settings."sv);
+		REX::INFO("Successfully verified INI settings."sv);
 		return OverrideSettings();
 	}
 
 	bool Holder::OverrideSettings() {
-		logger::info("==========================================================");
-		logger::info("Checking the custom INI..."sv);
+		REX::INFO("==========================================================");
+		REX::INFO("Checking the custom INI..."sv);
 		std::string iniPath = fmt::format(R"(.\Data\SKSE\Plugins\{}_custom.ini)"sv, Plugin::NAME);
 		if (!std::filesystem::exists(iniPath)) {
-			logger::info("  >Custom INI not found."sv);
+			REX::INFO("  >Custom INI not found."sv);
 			return true;
 		}
 
@@ -184,7 +184,7 @@ namespace Settings::INI
 			ini.GetAllSections(sections);
 
 			if (sections.empty()) {
-				logger::warn("  >Finished reading Custom INI file, but found no overrides.");
+				REX::WARN("  >Finished reading Custom INI file, but found no overrides.");
 				return true;
 			}
 
@@ -193,7 +193,7 @@ namespace Settings::INI
 				ini.GetAllKeys(section.pItem, sectionKeys);
 
 				if (sectionKeys.empty()) {
-					logger::warn("  >Custom INI section {} has no settings.", section.pItem);
+					REX::WARN("  >Custom INI section {} has no settings.", section.pItem);
 					continue;
 				}
 
@@ -201,7 +201,7 @@ namespace Settings::INI
 					const std::string foundSetting = fmt::format<std::string>("{}|{}"sv, section.pItem, key.pItem);
 					const auto settingKeyName = std::string(key.pItem);
 					if (settingKeyName.size() < 1) {
-						logger::error("  >Invalid setting in section {}."sv, key.pItem, section.pItem);
+						REX::ERROR("  >Invalid setting in section {}."sv, key.pItem, section.pItem);
 						continue;
 					}
 
@@ -209,15 +209,15 @@ namespace Settings::INI
 					if (settingType == "s") {
 						const std::string value = ini.GetValue(section.pItem, key.pItem);
 						if (value.empty()) {
-							logger::error("  >Invalid value in string setting {} in custom INI."sv, foundSetting);
+							REX::ERROR("  >Invalid value in string setting {} in custom INI."sv, foundSetting);
 							continue;
 						}
 						else if (!stringSettings.contains(foundSetting)) {
-							logger::error("  >Setting {} not defined in the base INI."sv, foundSetting);
+							REX::ERROR("  >Setting {} not defined in the base INI."sv, foundSetting);
 							continue;
 						}
 
-						logger::info("  >Overrode {} with {}."sv, foundSetting, value);
+						REX::INFO("  >Overrode {} with {}."sv, foundSetting, value);
 						stringSettings[foundSetting] = value;
 					}
 					else if (settingType == "f") {
@@ -228,40 +228,40 @@ namespace Settings::INI
 							std::numeric_limits<float>::min() :
 							static_cast<float>(raw);
 						if (!floatSettings.contains(foundSetting)) {
-							logger::error("  >Setting {} not defined in the base INI."sv, foundSetting);
+							REX::ERROR("  >Setting {} not defined in the base INI."sv, foundSetting);
 							continue;
 						}
 
-						logger::info("  >Overrode {} with {}."sv, foundSetting, std::to_string(value));
+						REX::INFO("  >Overrode {} with {}."sv, foundSetting, std::to_string(value));
 						floatSettings[foundSetting] = value;
 					}
 					else if (settingType == "b") {
 						if (!boolSettings.contains(foundSetting)) {
-							logger::error("  >Setting {} not defined in the base INI."sv, foundSetting);
+							REX::ERROR("  >Setting {} not defined in the base INI."sv, foundSetting);
 							continue;
 						}
 
-						logger::info("  >Overrode {} with {}."sv, foundSetting, ini.GetBoolValue(section.pItem, key.pItem));
+						REX::INFO("  >Overrode {} with {}."sv, foundSetting, ini.GetBoolValue(section.pItem, key.pItem));
 						boolSettings[foundSetting] = ini.GetBoolValue(section.pItem, key.pItem);
 					}
 					else if (settingType == "i") {
 						const long value = ini.GetLongValue(section.pItem, key.pItem);
 						if (!longSettings.contains(foundSetting)) {
-							logger::error("  >Setting {} not defined in the base INI."sv, foundSetting);
+							REX::ERROR("  >Setting {} not defined in the base INI."sv, foundSetting);
 							continue;
 						}
 
-						logger::info("  >Overrode {} with {}."sv, foundSetting, std::to_string(value));
+						REX::INFO("  >Overrode {} with {}."sv, foundSetting, std::to_string(value));
 						longSettings[foundSetting] = value;
 					}
 					else {
-						logger::error("  >Invalid setting {}. Settings must be prefixed by s, f, b, or i."sv, foundSetting);
+						REX::ERROR("  >Invalid setting {}. Settings must be prefixed by s, f, b, or i."sv, foundSetting);
 					}
 				}
 			}
 		}
 		catch (std::exception& e) {
-			logger::error("  >Caught exception {} while reading the CUSTOM ini.", e.what());
+			REX::ERROR("  >Caught exception {} while reading the CUSTOM ini.", e.what());
 			return false;
 		}
 

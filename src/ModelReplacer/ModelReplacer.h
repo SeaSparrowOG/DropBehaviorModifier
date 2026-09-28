@@ -50,7 +50,7 @@ namespace ModelReplacer
 			bool a_showInMenus);
 	};
 
-	class Swapper : public ISingleton<Swapper>
+	class Swapper : public REX::TSingleton<Swapper>
 	{
 	public:
 		RE::NiAVObject* AttemptModelSwap(RE::TESBoundObject* a_base,

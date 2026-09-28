@@ -12,13 +12,13 @@ namespace Events
 	}
 
 	bool Install() {
-		logger::info("Registering Event Listeners..."sv);
+		REX::INFO("Registering Event Listeners..."sv);
 		auto* listenerSingleton = LoadListener::GetSingleton();
 		if (!listenerSingleton) {
-			logger::error("  >Failed to grab LoadListener singleton."sv);
+			REX::ERROR("  >Failed to grab LoadListener singleton."sv);
 			return false;
 		}
-		logger::info("  >Registering TES Cell Attach/Detach Event Listener..."sv);
+		REX::INFO("  >Registering TES Cell Attach/Detach Event Listener..."sv);
 		return listenerSingleton->RegisterListener();
 	}
 
