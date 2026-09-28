@@ -9,6 +9,10 @@ namespace Settings::JSON
 		std::string jsonFolder = fmt::format(R"(.\Data\SKSE\Plugins\{})"sv, Plugin::NAME);
 		REX::INFO("Reading and validating project JSON files in {}.", jsonFolder);
 
+		if (!std::filesystem::is_directory(jsonFolder)) {
+			REX::INFO("  >No settings found."sv);
+			return true;
+		}
 		std::vector<std::string> paths{};
 		try {
 			for (const auto& entry : std::filesystem::directory_iterator(jsonFolder)) {
