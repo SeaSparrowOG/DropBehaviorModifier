@@ -4,7 +4,9 @@
 
 namespace RE
 {
+	// Not needed since 1.7
 	// Nabbed from PO3, but also pointed to it by Parapets.
+	/*
 	namespace BSModelDB
 	{
 		struct DBTraits
@@ -55,4 +57,5 @@ namespace RE
 		static REL::Relocation<func_t> func{ RE::Offset::NiAVObject::Clone };
 		return func(a_original);
 	}
+	*/
 }

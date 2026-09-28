@@ -22,6 +22,16 @@ namespace Events
 		return listenerSingleton->RegisterListener();
 	}
 
+	bool LoadListener::RegisterListener() {
+		auto* source = RE::ScriptEventSourceHolder::GetSingleton();
+		if (!source) {
+			REX::ERROR("  >Failed to get ScriptEventSourceHolder singleton."sv);
+			return false;
+		}
+		source->AddEventSink(this);
+		return true;
+	}
+
 	RE::BSEventNotifyControl LoadListener::ProcessEvent
 	(const RE::TESObjectLoadedEvent* a_event,
 		RE::BSTEventSource<RE::TESObjectLoadedEvent>*)

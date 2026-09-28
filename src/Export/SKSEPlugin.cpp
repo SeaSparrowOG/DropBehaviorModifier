@@ -10,7 +10,7 @@ extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []()
 	v.PluginVersion(Plugin::VERSION);
 	v.PluginName(Plugin::NAME);
 	v.AuthorName("SeaSparrow"sv);
-	v.UsesAddressLibrary(true);
+	v.UsesAddressLibrary();
 
 	return v;
 }();
@@ -32,11 +32,11 @@ static void MessageEventCallback(SKSE::MessagingInterface::Message* a_msg)
 	switch (a_msg->type) {
 	case SKSE::MessagingInterface::kDataLoaded:
 		if (!Settings::JSON::Holder::GetSingleton()->Read()) {
-			SKSE::stl::report_and_fail("Failed to read JSON settings."sv);
+			REX::FAIL("Failed to read JSON settings."sv);
 		}
 		REX::INFO("==========================================================");
 		if (!Events::Install()) {
-			SKSE::stl::report_and_fail("Failed to register event listeners."sv);
+			REX::FAIL("Failed to register event listeners."sv);
 		}
 		REX::INFO("==========================================================");
 		REX::INFO("Startup tasks finished, enjoy your game!");
@@ -89,10 +89,10 @@ SKSE_PLUGIN_LOAD(const SKSE::LoadInterface* a_skse)
 
 	REX::INFO("Performing startup tasks..."sv);
 	if (!Settings::INI::Holder::GetSingleton()->Read()) {
-		SKSE::stl::report_and_fail("Failed to read INI settings."sv);
+		REX::FAIL("Failed to read INI settings."sv);
 	}
 	if (!Hooks::Install()) {
-		SKSE::stl::report_and_fail("Failed to install necessary hooks."sv);
+		REX::FAIL("Failed to install necessary hooks."sv);
 	}
 
 	const auto messaging = SKSE::GetMessagingInterface();

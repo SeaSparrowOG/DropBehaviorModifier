@@ -161,7 +161,7 @@ namespace ModelReplacer
 	
 	void TextureSwap::Apply(RE::NiAVObject* a_target) {
 		auto texturePtr = RE::NiTexturePtr();
-		RE::GetTexture(texturePath.c_str(), true, texturePtr, false);
+		RE::BSShaderManager::GetTexture(texturePath.c_str(), true, texturePtr, false);
 		if (!texturePtr || !texturePtr.get()) {
 			return;
 		}
@@ -184,8 +184,15 @@ namespace ModelReplacer
 		}
 
 		auto* bsTriShape = targetNode->AsTriShape();
-		auto* properties = bsTriShape ? bsTriShape->properties[1].get() : nullptr;
-		auto* bsLightShader = properties ? netimmerse_cast<RE::BSLightingShaderProperty*>(properties) : nullptr;
+		if (!bsTriShape) {
+			return;
+		}
+		auto& shader = bsTriShape->shaderProperty;
+		if (!shader || !shader.get()) {
+			LOG_DEBUG("No shader property."sv);
+			return;
+		}
+		auto* bsLightShader = skyrim_cast<RE::BSLightingShaderProperty*>(shader.get());
 		auto* shaderMaterial = bsLightShader ? bsLightShader->material : nullptr;
 		auto* base = shaderMaterial ? skyrim_cast<RE::BSLightingShaderMaterialBase*>(shaderMaterial) : nullptr;
 		if (!base) {
@@ -211,10 +218,11 @@ namespace ModelReplacer
 	}
 
 	RE::NiAVObject* ModelSwap::ConstructGraphics() {
+		using EC = RE::BSResource::ErrorCode;
 		const auto args = RE::BSModelDB::DBTraits::ArgsType();
 		auto out = RE::NiPointer<RE::NiNode>();
-		int error = RE::Demand(altModel.c_str(), out, args);
-		if (error != 0) {
+		EC error = RE::BSModelDB::Demand(altModel.c_str(), out, args);
+		if (error != EC::kNone) {
 			LOG_DEBUG("Errored on demand."sv);
 			return nullptr;
 		}
@@ -231,8 +239,8 @@ namespace ModelReplacer
 			}
 		}
 
-		auto* clone = RE::CloneNiAVObject(constructedObject);
-		return clone;
+		auto* clone = constructedObject->Clone();
+		return clone ? skyrim_cast<RE::NiAVObject*>(clone) : nullptr;
 	}
 
 	ModelSwap::ModelSwap(int32_t a_count, 

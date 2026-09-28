@@ -154,7 +154,7 @@ namespace Settings::JSON
 		}
 		
 		if (baseObjectField.isString()) {
-			auto* foundObject = Utilities::Forms::GetFormFromString<RE::TESBoundObject>(baseObjectField.asString());
+			auto* foundObject = GetFormFromString<RE::TESBoundObject>(baseObjectField.asString());
 			if (!foundObject) {
 				REX::INFO("    >Field {} specifies form {}, but does not exist in game files. This may be normal."sv, BASE_OBJECT_FIELD, baseObjectField.asString());
 				return true;
@@ -168,7 +168,7 @@ namespace Settings::JSON
 					return false;
 				}
 
-				auto* foundObject = Utilities::Forms::GetFormFromString<RE::TESBoundObject>(enclosedForm.asString());
+				auto* foundObject = GetFormFromString<RE::TESBoundObject>(enclosedForm.asString());
 				if (!foundObject) {
 					REX::INFO("    >Field {} specifies form {}, but does not exist in game files. This may be normal."sv, BASE_OBJECT_FIELD, enclosedForm.asString());
 					continue;
@@ -220,7 +220,7 @@ namespace Settings::JSON
 		}
 
 		auto newModelPathRaw = newModelField.asString();
-		auto newModelPath = Utilities::String::tolower(newModelPathRaw);
+		auto newModelPath = clib_util::string::tolower(newModelPathRaw);
 
 		if (!std::regex_match(newModelPath.c_str(), std::regex(R"(^((?!meshes\\).)*\\([^\\\n]*\.nif)$)"))) {
 			REX::ERROR("      >Provided field {} <{}> is invalid. Treating config as invalid."sv, CONDITIONAL_MODEL_FIELD, newModelPathRaw);
@@ -305,7 +305,7 @@ namespace Settings::JSON
 			}
 
 			auto newTexturePath = "textures\\" + newTexturePathRaw;
-			newTexturePath = Utilities::String::tolower(newTexturePath);
+			newTexturePath = clib_util::string::tolower(newTexturePath);
 			if (!RE::BSResourceNiBinaryStream(newTexturePath.c_str()).good()) {
 				REX::WARN("          >Path <{}> could not be resolved. This may be normal if it comes from an optional mod."sv, newTexturePathRaw);
 				continue;
@@ -321,7 +321,7 @@ namespace Settings::JSON
 				return InternalResponse::kFailure;
 			}
 
-			auto nodePath = Utilities::String::split(targetField.asString(), "|");
+			auto nodePath = clib_util::string::split(targetField.asString(), "|");
 			if (nodePath.empty()) {
 				REX::WARN("          >Entry with node path {} failed to return a proper node path. This is potentially an error, but won't invalidate the config."sv, targetField.asString());
 				continue;

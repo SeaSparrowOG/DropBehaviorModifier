@@ -68,12 +68,12 @@ namespace Hooks
 		REX::INFO("Inventory 3D Manager:"sv);
 
 		REL::Relocation<std::uintptr_t> target{ REL::ID(51851), offset};
-		if (!(Pattern<"E9">().match(target.address()))) {
-			SKSE::stl::report_and_fail("Failed to validate pattern of the Inventory 3D Manager."sv);
+		if (!(REL::Pattern<"E9">().match(target.address()))) {
+			REX::FAIL("Failed to validate pattern of the Inventory 3D Manager."sv);
 		}
 
 		auto& trampoline = REL::GetTrampoline();
-		_func = trampoline.write_branch<5>(target.address(), &Thunk);
+		_func = trampoline.write_jmp<5>(target.address(), &Thunk);
 
 		return true;
 	}
@@ -88,7 +88,7 @@ namespace Hooks
 			return;
 		}
 
-		a_this->Clear3D();
+		a_this->UnloadInventoryItem();
 		a_this->loadedModels.clear();
 		_func(a_this, a_entryData);
 	}

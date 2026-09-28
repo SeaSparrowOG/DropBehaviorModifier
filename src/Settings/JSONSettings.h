@@ -1,11 +1,46 @@
 #pragma once
 
+#include "ClibUtil/string.hpp"
 #include "ModelReplacer/ModelReplacer.h"
 
 namespace Settings
 {
 	namespace JSON
 	{
+		template <typename T>
+		T* GetFormFromString(const std::string& a_str)
+		{
+			auto* dh = RE::TESDataHandler::GetSingleton();
+			if (!dh) {
+				return nullptr;
+			}
+
+			const auto splitID = clib_util::string::split(a_str, "|");
+			const auto splitSize = splitID.size();
+
+			if (splitSize == 2) {
+				const auto& pluginName = splitID[0];
+				const auto& rawID = splitID[1];
+				if (!dh->LookupModByName(pluginName)) {
+					return nullptr;
+				}
+				else if (!clib_util::string::is_only_hex(rawID)) {
+					return nullptr;
+				}
+
+				const auto formID = clib_util::string::to_num<RE::FormID>(rawID, true);
+				auto* foundForm = dh->LookupForm(formID, pluginName);
+				if (!foundForm) {
+					nullptr;
+				}
+				else {
+					return skyrim_cast<T*>(foundForm);
+				}
+			}
+			auto* foundForm = RE::TESForm::LookupByEditorID(a_str);
+			return foundForm ? skyrim_cast<T*>(foundForm) : nullptr;
+		}
+
 		enum class InternalResponse : uint8_t
 		{
 			kSuccess = 0,
