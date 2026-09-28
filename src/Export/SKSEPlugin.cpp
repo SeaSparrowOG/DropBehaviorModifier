@@ -11,6 +11,7 @@ extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []()
 	v.PluginName(Plugin::NAME);
 	v.AuthorName("SeaSparrow"sv);
 	v.UsesAddressLibrary();
+	v.UsesUpdatedStructs();
 
 	return v;
 }();
